@@ -13,16 +13,16 @@ function FullyConnectedHiddenLayers(
 end
 
 function FullyConnectedHiddenLayers(
-    input_layer::NeuralLayer,
+    input_size::T_INT,
     sizes::Vector{T_INT},
     weight_sampler::Function,
     activator::Activator
 )
     hidden_layers = NeuralLayer[]
-    prev_layer_size = input_layer.size
+    prev_layer_size = input_size
     for layer_size in sizes
         connections = ones(prev_layer_size, layer_size)
-        hidden_layer = HiddenLayer(input_layer, int(connections), activator, weight_sampler)
+        hidden_layer = HiddenLayer(int(connections), activator, weight_sampler)
         push!(hidden_layers, hidden_layer)
         prev_layer_size = layer_size
         input_layer = hidden_layer
@@ -31,7 +31,7 @@ function FullyConnectedHiddenLayers(
 end
 
 function FullyConnectedHiddenAndOutputLayers(
-    input_layer::NeuralLayer,
+    input_size::T_INT,
     sizes::Vector{T_INT},
     num_classes::T_INT,
     weight_sampler::Function,
@@ -39,7 +39,7 @@ function FullyConnectedHiddenAndOutputLayers(
     output_layer_activator::Activator=SOFTMAX_ACTIVATOR
 )
     hidden_layers = FullyConnectedHiddenLayers(
-        input_layer,
+        input_size,
         sizes,
         weight_sampler,
         activator

@@ -1,7 +1,7 @@
 module JuliaNet
 
-using Devectorize
-using PyCall
+import Base.push!
+import Base.size
 
 include("constants.jl")
 
@@ -13,23 +13,19 @@ include("type/Activator.jl")
 include("type/InputTensor.jl")
 include("type/NeuralLayer.jl")
 include("type/HiddenLayer.jl")
-include("type/FeatureMapLayer.jl")
-include("type/ConvolutionalLayer.jl")
-include("type/PoolingLayer.jl")
-include("type/InputLayer.jl")
 include("type/NeuralNetwork.jl")
-include("type/FitResults.jl")
+include("type/misc.jl")
 
 # Factories for the data types
 include("factory/HiddenLayer.jl")
 include("factory/OutputLayer.jl")
 include("factory/NeuralNetwork.jl")
 
+include("util/train.jl")
 include("util/misc.jl")
 include("util/matrix.jl")
-include("util/convolution.jl")
 
-include("backprop.jl")
+include("train.jl")
 include("score.jl")
 include("regularization.jl")
 include("early_stopping.jl")
@@ -45,7 +41,6 @@ export fit!,
 
 export NeuralNetwork,
        HiddenLayer,
-       InputLayer,
        OutputLayer,
        ConvolutionalLayer,
        PoolingLayer,

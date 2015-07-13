@@ -5,8 +5,7 @@ function FullyConnectedOutputLayer(
     activator::Activator=SOFTMAX_ACTIVATOR
 )
     HiddenLayer(
-        input_layer,
-        int(ones(input_layer.size, num_classes)),
+        int(ones(size(input_layer), num_classes)),
         activator,
         weight_sampler
     )

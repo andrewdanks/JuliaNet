@@ -2,7 +2,7 @@ function zero_out_with_prob(M::Matrix{T_FLOAT}, prob::T_FLOAT)
     M2 = rand(size(M))
     M2[find(x -> x < prob, M2)] = 0.
     M2[find(x -> x != 0, M2)] = 1.
-    @devec ret = M2 .* M
+    ret = M2 .* M
     ret
 end
 

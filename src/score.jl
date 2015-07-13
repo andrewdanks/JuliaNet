@@ -20,8 +20,7 @@ function predict(nn::NeuralNetwork, Y_prob::Matrix{T_FLOAT})
 end
 
 function test_error(predictions::Vector{T_FLOAT}, targets::Vector)
-    total = length(targets)
-    count(i -> i != 0, predictions - targets) / total
+    count(i -> i != 0, predictions - targets) / length(targets)
 end
 
 function get_class_from_prob(nn::NeuralNetwork, y_prob::Vector)

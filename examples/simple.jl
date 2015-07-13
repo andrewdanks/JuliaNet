@@ -2,7 +2,7 @@ using JuliaNet
 using MNIST
 
 X, Y = MNIST.traindata()
-trainX, trainY = X[:, 1:50000], Y[1:50000]
+trainX, trainY = X[:, 1:5000], Y[1:5000]
 validX, validY = X[:, 50001:end], Y[50001:end]
 testX, testY = MNIST.testdata()
 
@@ -22,29 +22,32 @@ function sample_weights(dims::(Number, Number))
     sample_weights(dims[1], dims[2])
 end
 
-input_layer = InputLayer(num_features)
 
-srand(34454)
+srand(34455)
 hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
-    input_layer,
-    [800, 800],
+    num_features,
+    [1200, 1200],
     num_classes,
     sample_weights,
     SIGMOID_ACTIVATOR
 )
 
-net = NeuralNetwork(vcat(input_layer, hidden_layers, output_layer))
+net = NeuralNetwork(vcat(hidden_layers, output_layer))
 
 params = HyperParams()
-params.batch_size = 50
-params.epochs = 100
-params.momentum = 0.7
-params.learning_rate = 0.5
+params.batch_size = 100
+params.epochs = 5
+params.momentum = 0.4
+params.learning_rate = 0.7
 
-fit!(net, prcoessed_trainX, trainY, params,
+fit!(
+    net,
+    prcoessed_trainX,
+    trainY,
+    params,
     valid_data=processed_validX,
     valid_targets=validY,
 )
 
 predictions = predict(net, processed_textX, testY)
-println("test accuracy: ", test_error(predictions, testY))
+println("test error: ", test_error(predictions, testY))

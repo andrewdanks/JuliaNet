@@ -1,8 +1,4 @@
 type HiddenLayer <: NeuralLayer
-    size::T_INT
-
-    input_layer::NeuralLayer
-
     # Activator is responsible for doing any transformations
     # to the input before it goes to the next layer
     activator::Activator
@@ -19,18 +15,7 @@ type HiddenLayer <: NeuralLayer
     # Each component i represents the bias for the i'th neuron
     biases::Vector{T_FLOAT}
 
-    # Properties that only pertain to the layer while training
-
-    prev_weight_delta::Matrix{T_FLOAT}
-    prev_bias_delta::Vector{T_FLOAT}
-
-    pre_activation::Matrix{T_FLOAT}
-    activation::InputTensor
-    grad_weights::Matrix{T_FLOAT}
-
     function HiddenLayer(
-        input_layer::NeuralLayer,
-
         # Dimensions: <pevious layer size x this layer size>
         # Matrix of 1s and 0s where 1s indicate where a connection is present
         # (i,j) == 1 indicate that neuron i in previous layer connects to
@@ -44,7 +29,6 @@ type HiddenLayer <: NeuralLayer
         # be returned with samples from some distribution
         weight_sampler::Function
     )
-
         prev_layer_size, this_layer_size = size(connections)
 
         weights = weight_sampler(prev_layer_size, this_layer_size)
@@ -53,45 +37,22 @@ type HiddenLayer <: NeuralLayer
 
         biases = vectorize(zeros(this_layer_size, 1))
 
-        prev_weight_delta = zeros(size(weights))
-        prev_bias_delta = zeros(size(biases))
-
         new(
-            this_layer_size,
-            input_layer,
             activator,
             connections,
             weights,
-            biases,
-            prev_weight_delta,
-            prev_bias_delta
+            biases
         )
     end
 
 end
 
-function activate_layer!(
-    layer::HiddenLayer,
-    input::InputTensor,
-    activation_fn::Function
-)
-    vectorized_input = vectorized_data(input)    
-    layer.pre_activation = layer.weights' * vectorized_input
-    layer.activation = InputTensor(activation_fn(layer.pre_activation))
+
+function input_size(layer::HiddenLayer)
+    ize(layer.connections)[1]
 end
 
-function set_weight_gradients!(layer::HiddenLayer, error_signal::T_TENSOR)
-    input = vectorized_data(layer_input(layer))
-    batch_size = size(error_signal)[2]
-    grad_weights = (input * error_signal') / batch_size
-    layer.grad_weights = layer.connections .* grad_weights
-end
 
 function Base.size(layer::HiddenLayer)
-    layer.size
-end
-
-function Base.show(io::IO, layer::HiddenLayer)
-    layer_type = typeof(layer)
-    println(layer_type, "[", layer.size, "; ", layer.activator, "]")
+    size(layer.connections)[2]
 end

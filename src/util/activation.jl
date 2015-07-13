@@ -7,14 +7,6 @@ function grad_sigmoid(x)
     sig .* (1. - sig)
 end
 
-function rectified_linear(x)
-    log(1. + exp(x))
-end
-
-function grad_rectified_linear(x)
-    sigmoid(x)
-end
-
 function grad_tanh(x)
     1. - tanh(x).^2
 end
