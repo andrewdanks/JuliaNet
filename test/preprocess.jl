@@ -2,6 +2,7 @@ using JuliaNet
 using Base.Test
 
 R = rand(10, 10)
+EPSILON = 10E-8
 
-@test mean(zero_mean(R), 2) == 0
-@test var(unit_variance(R), 2) == 1
+@test all(mean(zero_mean(R), 2) .< EPSILON)
+@test all(var(unit_variance(R), 2) .- 1 .< EPSILON)
