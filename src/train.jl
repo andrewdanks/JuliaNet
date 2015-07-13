@@ -123,6 +123,8 @@ function fit_epoch!(
 )
     linked_layers = LinkedLayer[]
     function call_func(batch::Batch)
+        # This is a bit of a hack since there's only one property
+        # in LinkedLayer that we want to maintain between batches
         linked_layers = get_linked_layers(nn.layers, linked_layers)
         fit_batch(nn, linked_layers, params, batch)
     end
