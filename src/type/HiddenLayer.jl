@@ -15,6 +15,9 @@ type HiddenLayer <: NeuralLayer
     # Each component i represents the bias for the i'th neuron
     biases::Vector{T_FLOAT}
 
+    # undefined properties by default
+    dropout_coefficient::T_FLOAT
+
     function HiddenLayer(
         # Dimensions: <pevious layer size x this layer size>
         # Matrix of 1s and 0s where 1s indicate where a connection is present

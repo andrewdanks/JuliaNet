@@ -126,6 +126,7 @@ function fit_epoch!(
         # This is a bit of a hack since there's only one property
         # in LinkedLayer that we want to maintain between batches
         linked_layers = get_linked_layers(nn.layers, linked_layers)
+        set_dropout_masks!(linked_layers, size(batch))
         fit_batch(nn, linked_layers, params, batch)
     end
 
@@ -158,7 +159,7 @@ function fit_batch(
     output = forward_pass!(batch.input, linked_layers[1])
 
     # Propagate the error signal back through the work and calculate the gradients
-    error_signal = -linked_layers[end].activator.grad_activation_fn(
+    error_signal = -linked_layers[end].data_layer.activator.grad_activation_fn(
         output, batch.target_output
     )
     backward_pass!(error_signal, linked_layers[end])
@@ -168,10 +169,9 @@ function fit_batch(
     classification_error = test_error(predict(nn, output), batch.target_classes)
 
     for (idx, layer) in enumerate(nn.layers)
+        prev_weight_delta = 0
         if params.momentum > 0 && isdefined(linked_layers[idx], :prev_weight_delta)
             prev_weight_delta = linked_layers[idx].prev_weight_delta 
-        else
-            prev_weight_delta = 0
         end
         weight_delta = params.momentum * prev_weight_delta - params.learning_rate * grad_weights[idx]
         linked_layers[idx].weight_delta = weight_delta
@@ -187,18 +187,20 @@ function get_pre_activation(weights::Matrix, input::InputTensor)
 end
 
 
-function get_activation(activation_fn::Function, pre_activation::T_TENSOR)
-    InputTensor(activation_fn(pre_activation))
-end
-
-
 function forward_pass!(
     input::InputTensor,
     layer::LinkedLayer
 )
     layer.input = input
-    layer.pre_activation = get_pre_activation(layer.weights, input)
-    layer.activation = get_activation(layer.activator.activation_fn, layer.pre_activation)
+    layer.pre_activation = get_pre_activation(layer.data_layer.weights, input)
+    activation = layer.data_layer.activator.activation_fn(layer.pre_activation)
+    
+    if isdefined(layer, :dropout_mask)
+        activation = activation .* layer.dropout_mask
+    end
+
+    layer.activation = InputTensor(activation)
+
     if has_next(layer)
         forward_pass!(layer.activation, layer.next)
     else
@@ -216,8 +218,8 @@ function backward_pass!(
         prev_pre_activation = layer.prev.pre_activation
         backward_pass!(
             get_grad_error_wrt_net(
-                layer.prev.activator.grad_activation_fn,
-                layer.weights,
+                layer.prev.data_layer.activator.grad_activation_fn,
+                layer.data_layer.weights,
                 layer.prev.pre_activation,
                 error_signal
             ),
@@ -228,9 +230,14 @@ end
 
 
 function forward_pass(nn::NeuralNetwork, input::InputTensor)
-    for layer in nn.layers
+    for (idx, layer) in enumerate(nn.layers)
         pre_activation = get_pre_activation(layer.weights, input)
-        input = get_activation(layer.activator.activation_fn, pre_activation)
+        if isdefined(layer, :dropout_coefficient)
+            pre_activation = pre_activation .* layer.dropout_coefficient
+        end
+
+        activation = layer.activator.activation_fn(pre_activation)
+        input = InputTensor(activation)
     end
     vectorized_data(input)
 end

@@ -31,6 +31,8 @@ hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
     sample_weights,
     SIGMOID_ACTIVATOR
 )
+hidden_layers[1].dropout_coefficient = 0.5
+hidden_layers[2].dropout_coefficient = 0.5
 
 net = NeuralNetwork(vcat(hidden_layers, output_layer))
 

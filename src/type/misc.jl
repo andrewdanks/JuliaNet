@@ -1,8 +1,7 @@
 # Types applicable only to training
 
 type LinkedLayer
-    activator::Activator
-    weights::Matrix
+    data_layer::NeuralLayer
 
     prev::LinkedLayer
     next::LinkedLayer
@@ -12,9 +11,11 @@ type LinkedLayer
     activation::InputTensor
     grad_weights::Matrix
     weight_delta::Matrix
-    prev_weight_delta::Matrix
 
-    LinkedLayer(activator, weights) = new(activator, weights)
+    prev_weight_delta::Matrix
+    dropout_mask::Matrix{T_FLOAT}
+
+    LinkedLayer(layer::NeuralLayer) = new(layer)
 end
 
 
@@ -48,6 +49,11 @@ type Batch
     input::InputTensor
     target_output::Matrix
     target_classes::Vector
+end
+
+
+function Base.size(batch::Batch)
+    batch.input.batch_size
 end
 
 
