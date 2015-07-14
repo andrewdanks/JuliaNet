@@ -230,10 +230,10 @@ end
 
 
 function forward_pass(nn::NeuralNetwork, input::InputTensor)
-    for (idx, layer) in enumerate(nn.layers)
+    for layer in nn.layers
         pre_activation = get_pre_activation(layer.weights, input)
         if isdefined(layer, :dropout_coefficient)
-            pre_activation = pre_activation .* layer.dropout_coefficient
+            pre_activation = pre_activation * (1 - layer.dropout_coefficient)
         end
 
         activation = layer.activator.activation_fn(pre_activation)
