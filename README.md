@@ -6,11 +6,11 @@ A deep neural network library for Julia. Features include:
 -   Multi-classification
 -   Momentum
 -   Nesterov's Accelerated Gradient method [3]
--   Mini-batch support
+-   Online, mini-batch, and batched learning
 -   Custom stop criterion functions
 -   Custom hyper paramater update criterion
 -   Custom activation functions
--   Customized hidden layers
+-   Custom connections between layers
 -   Random weight initializing based on fan-in/out heuristics [1]
 -   Dropout [2]
 -   Parallelization support
@@ -24,7 +24,7 @@ instead of exclusively treating it as a black box.
 Getting started
 ---------------
 
-See `example.jl` for a typical use case.
+See the examples directory for use cases.
 
 
 Requirements
