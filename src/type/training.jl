@@ -7,13 +7,13 @@ type LinkedLayer
     next::LinkedLayer
 
     input::InputTensor
-    pre_activation::Matrix
+    pre_activation::T_TENSOR
     activation::InputTensor
-    grad_weights::Matrix
-    weight_delta::Matrix
+    grad_weights::T_TENSOR
+    weight_delta::T_TENSOR
 
-    prev_weight_delta::Matrix
-    dropout_mask::Matrix{T_FLOAT}
+    prev_weight_delta::T_TENSOR
+    dropout_mask::Matrix
 
     LinkedLayer(layer::NeuralLayer) = new(layer)
 end
@@ -30,9 +30,9 @@ end
 
 
 type BatchResults
-    grad_weights    
-    loss
-    classification_error
+    grad_weights::T_TENSOR
+    loss::T_FLOAT
+    classification_error::T_FLOAT
 end
 
 
