@@ -63,8 +63,3 @@ end
 function Base.size(layer::FeatureMapLayer)
     layer.num_maps * prod(layer.feature_map_size)
 end
-
-function Base.show(io::IO, layer::FeatureMapLayer)
-    properties = [layer.size, layer.activator, layer.num_maps, layer.feature_map_size, layer.kernel_size]
-    println(typeof(layer), "[", join(properties, "; "), "]")
-end
