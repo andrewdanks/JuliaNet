@@ -118,3 +118,8 @@ end
 function Base.getindex(input_tensor::InputTensor, args...)
     getindex(input_tensor.data, args...)
 end
+
+function ==(a::InputTensor, b::InputTensor)
+    a.data == b.data
+end
+
