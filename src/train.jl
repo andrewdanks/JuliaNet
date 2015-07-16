@@ -169,16 +169,21 @@ function fit_batch(
     classification_error = test_error(predict(nn, output), batch.target_classes)
 
     for (idx, layer) in enumerate(nn.layers)
-        prev_weight_delta = 0
-        if params.momentum > 0 && isdefined(linked_layers[idx], :prev_weight_delta)
-            prev_weight_delta = linked_layers[idx].prev_weight_delta 
-        end
-        weight_delta = params.momentum * prev_weight_delta - params.learning_rate * grad_weights[idx]
-        linked_layers[idx].weight_delta = weight_delta
-        layer.weights += weight_delta
+        update_weights!(linked_layers[idx], params)
     end
 
     BatchResults(grad_weights, loss, classification_error)
+end
+
+
+function update_weights!(linked_layer::LinkedLayer, params::HyperParams)
+    prev_weight_delta = 0
+    if params.momentum > 0 && isdefined(linked_layer, :prev_weight_delta)
+        prev_weight_delta = linked_layer.prev_weight_delta 
+    end
+    weight_delta = params.momentum * prev_weight_delta - params.learning_rate * grad_weights[idx]
+    linked_layer.weight_delta = weight_delta
+    linked_layer.data_layer.weights += weight_delta
 end
 
 
