@@ -1,16 +1,4 @@
-function zero_out_with_prob(M::Matrix{T_FLOAT}, prob::T_FLOAT)
-    M2 = rand(size(M))
-    M2[find(x -> x < prob, M2)] = 0.
-    M2[find(x -> x != 0, M2)] = 1.
-    ret = M2 .* M
-    ret
-end
-
-function zero_out_with_prob(T::T_4D_TENSOR, prob::T_FLOAT)
-    zero_out_with_prob(InputTensor(T), prob).data
-end
-
-function get_ith_batch(X::Matrix{T_FLOAT}, i::T_INT, batch_size::T_INT)
+function get_ith_batch(X::Matrix, i::T_INT, batch_size::T_INT)
     start = (i - 1) * batch_size + 1
     finish = start + batch_size - 1
     X[:, start:finish]
