@@ -22,27 +22,3 @@ TANH_ACTIVATOR = Activator(tanh, grad_tanh)
 LECUN_TANH_ACTIVATOR = Activator(lecun_tanh, grad_lecun_tanh)
 SOFTMAX_ACTIVATOR = Activator(softmax, grad_squared_error)
 
-
-function DropoutActivator(
-    activation_fn::Function,
-    grad_activation_fn::Function,
-    dropout_probability::T_FLOAT
-)
-    dropout_activation_fn = function(input)
-        zero_out_with_prob(activation_fn(input), dropout_probability)
-    end
-    test_dropout_activation_fn = function(input)
-        activation_fn(input) .* (1 - dropout_probability)
-    end
-    Activator(dropout_activation_fn, grad_activation_fn, test_dropout_activation_fn)
-end
-
-
-function DropoutActivator(activator::Activator, dropout_probability::T_FLOAT)
-    DropoutActivator(activator.activation_fn, activator.grad_activation_fn, dropout_probability)
-end
-
-
-function DropoutActivator(dropout_probability::T_FLOAT)
-    DropoutActivator(IDENTITY_ACTIVATOR, dropout_probability)
-end
