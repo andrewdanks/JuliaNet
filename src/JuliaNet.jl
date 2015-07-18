@@ -12,18 +12,20 @@ include("type/HyperParams.jl")
 include("type/Activator.jl")
 include("type/InputTensor.jl")
 include("type/NeuralLayer.jl")
+include("type/training.jl")
 include("type/HiddenLayer.jl")
+include("type/FeatureMapLayer.jl")
+include("type/ConvolutionalLayer.jl")
+include("type/PoolingLayer.jl")
 include("type/NeuralNetwork.jl")
-include("type/misc.jl")
 
 # Factories for the data types
-include("factory/HiddenLayer.jl")
-include("factory/OutputLayer.jl")
-include("factory/NeuralNetwork.jl")
+include("factory/NeuralLayer.jl")
 
-include("util/train.jl")
+include("util/linked_layers.jl")
 include("util/misc.jl")
 include("util/matrix.jl")
+include("util/convolution.jl")
 
 include("regularization.jl")
 include("train.jl")
@@ -44,12 +46,10 @@ export NeuralNetwork,
        OutputLayer,
        ConvolutionalLayer,
        PoolingLayer,
-       MaxPoolingLayer,
-       MaxPoolingActivator,
-       HyperParams
+       HyperParams,
+       InputTensor
 
-export SimpleFullyConnectedNeuralNetwork,
-       FullyConnectedHiddenLayers,
+export FullyConnectedHiddenLayers,
        FullyConnectedOutputLayer,
        FullyConnectedHiddenAndOutputLayers
 
