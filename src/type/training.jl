@@ -1,7 +1,7 @@
 # Types applicable only to training
 
-type LinkedLayer
-    data_layer::NeuralLayer
+type LinkedLayer{T<:NeuralLayer}
+    data_layer::T
 
     prev::LinkedLayer
     next::LinkedLayer
@@ -15,7 +15,10 @@ type LinkedLayer
     prev_weight_delta::T_TENSOR
     dropout_mask::Matrix
 
-    LinkedLayer(layer::NeuralLayer) = new(layer)
+    # for pooling layer only
+    max_masks::T_TENSOR
+
+    LinkedLayer(layer::T) = new(layer)
 end
 
 

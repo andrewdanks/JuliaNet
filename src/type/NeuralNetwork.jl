@@ -1,14 +1,18 @@
 type NeuralNetwork
     layers::Vector{NeuralLayer}
-    classes::Vector
+    classes::Vector{Number}
 
     NeuralNetwork() = new(NeuralLayer[])
-    NeuralNetwork(layers::Vector{NeuralLayer}) = new(layers)
+    NeuralNetwork{T<:NeuralLayer}(layers::Vector{T}) = new(layers)
 end
 
 
 function Base.push!(nn::NeuralNetwork, layer::NeuralLayer)
-    # TODO: check that there's an input layer
+    push!(nn.layers, layer)
+end
+
+
+function Base.push!(nn::NeuralNetwork, layer::ConvolutionalLayer)
     push!(nn.layers, layer)
 end
 

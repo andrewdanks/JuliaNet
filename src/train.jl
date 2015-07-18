@@ -176,19 +176,19 @@ function fit_batch(
 end
 
 
-function update_weights!(linked_layer::LinkedLayer, params::HyperParams)
+function update_weights!{T<:NeuralLayer}(layer::LinkedLayer{T}, params::HyperParams)
     prev_weight_delta = 0
-    if params.momentum > 0 && isdefined(linked_layer, :prev_weight_delta)
-        prev_weight_delta = linked_layer.prev_weight_delta 
+    if params.momentum > 0 && isdefined(layer, :prev_weight_delta)
+        prev_weight_delta = layer.prev_weight_delta 
     end
-    weight_delta = params.momentum * prev_weight_delta - params.learning_rate * grad_weights[idx]
-    linked_layer.weight_delta = weight_delta
-    linked_layer.data_layer.weights += weight_delta
+    weight_delta = params.momentum * prev_weight_delta - params.learning_rate * layer.grad_weights
+    layer.weight_delta = weight_delta
+    layer.data_layer.weights += weight_delta
 end
 
 
-function get_pre_activation(weights::Matrix, input::InputTensor)
-    weights' * vectorized_data(input)
+function get_pre_activation(layer::NeuralLayer, input::InputTensor)
+    layer.weights' * vectorized_data(input)
 end
 
 
@@ -244,31 +244,21 @@ function backward_pass!(
 end
 
 
-function forward_pass(nn::NeuralNetwork, input::InputTensor)
-    for layer in nn.layers
-        pre_activation = get_pre_activation(layer.weights, input)
-        if isdefined(layer, :dropout_coefficient)
-            pre_activation = pre_activation * (1 - layer.dropout_coefficient)
-        end
-
-        activation = layer.activator.activation_fn(pre_activation)
-        input = InputTensor(activation)
-    end
-    vectorized_data(input)
-end
-
-
-function get_grad_weights(input::InputTensor, error_signal::T_TENSOR)
-    batch_size = size(error_signal)[2]
-    vectorized_data(input) * error_signal' / batch_size
-end
-
-
-function get_grad_error_wrt_net(
-    grad_activation_fn::Function,
-    weights::Matrix,
-    prev_pre_activation::T_TENSOR,
+function get_grad_weights{T<:NeuralLayer}(
+    layer::LinkedLayer{T},
     error_signal::T_2D_TENSOR
 )
+    batch_size = size(error_signal)[2]
+    vectorized_data(layer.input) * error_signal' / batch_size
+end
+
+
+function get_grad_error_wrt_net{T<:NeuralLayer}(
+    layer::LinkedLayer{T},
+    error_signal::T_2D_TENSOR
+)
+    grad_activation_fn = layer.prev.data_layer.activator.grad_activation_fn
+    weights = layer.data_layer.weights
+    prev_pre_activation = vectorized_data(InputTensor(layer.prev.pre_activation))
     (weights * error_signal) .* grad_activation_fn(prev_pre_activation)
 end

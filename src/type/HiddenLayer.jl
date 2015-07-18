@@ -13,7 +13,7 @@ type HiddenLayer <: NeuralLayer
 
     # Dimensions: <this layer size>
     # Each component i represents the bias for the i'th neuron
-    biases::Vector{T_FLOAT}
+    # biases::Vector{T_FLOAT}
 
     # undefined properties by default
     dropout_coefficient::T_FLOAT
@@ -43,8 +43,7 @@ type HiddenLayer <: NeuralLayer
         new(
             activator,
             connections,
-            weights,
-            biases
+            weights
         )
     end
 
