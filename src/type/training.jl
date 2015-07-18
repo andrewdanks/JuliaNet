@@ -32,10 +32,10 @@ function has_next(layer::LinkedLayer)
 end
 
 
-type BatchResults
-    grad_weights::T_TENSOR
-    loss::T_FLOAT
-    classification_error::T_FLOAT
+immutable type BatchResults
+    grad_weights
+    loss
+    classification_error
 end
 
 
@@ -48,7 +48,7 @@ function +(a::BatchResults, b::BatchResults)
 end
 
 
-type Batch
+immutable type Batch
     input::InputTensor
     target_output::Matrix
     target_classes::Vector
@@ -60,14 +60,14 @@ function Base.size(batch::Batch)
 end
 
 
-type EarlyStopCriterion
+immutable type EarlyStopCriterion
     current_epoch::T_UINT
     training_loss_history::Vector{T_FLOAT}
     validation_loss_history::Vector{T_FLOAT}
 end
 
 
-type ParamUpdateCriterion
+immutable type ParamUpdateCriterion
     params::HyperParams
     current_epoch::T_UINT
     training_loss_history::Vector{T_FLOAT}
@@ -75,7 +75,7 @@ type ParamUpdateCriterion
 end
 
 
-type FitResults
+immutable type FitResults
     training_loss_history::Array{T_FLOAT, 1}
     validation_loss_history::Array{T_FLOAT, 1}
     time::T_FLOAT
