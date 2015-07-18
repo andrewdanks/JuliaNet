@@ -115,8 +115,18 @@ function zero_out_with_prob(input::InputTensor, prob::T_FLOAT)
     end
 end
 
+
+function get_batch_range(input_tensor::InputTensor, range::UnitRange{T_INT})
+    vectorized_data(batch.input)[range,:]
+end
+
+
 function Base.size(input_tensor::InputTensor, i)
     size(input_tensor.data, i)
+end
+
+function Base.ndims(input_tensor::InputTensor)
+    ndims(input_tensor.data)
 end
 
 function Base.slicedim(input_tensor::InputTensor, d, i)

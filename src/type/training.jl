@@ -60,6 +60,15 @@ function Base.size(batch::Batch)
 end
 
 
+function get_chunk_from_batch(batch::Batch, range::UnitRange{T_INT})
+    Batch(
+        InputTensor(get_batch_range(batch.input, range), batch.input.num_maps),
+        target_output[range,:],
+        target_classes[range]
+    )
+end
+
+
 immutable type EarlyStopCriterion
     current_epoch::T_UINT
     training_loss_history::Vector{T_FLOAT}
