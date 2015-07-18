@@ -7,7 +7,8 @@ function fit!(
     valid_data::Matrix{T_FLOAT}=None,
     valid_targets::Vector{T_FLOAT}=None,
 
-    verbose::Bool=true
+    verbose::Bool=true,
+    input_map_size::(T_UINT, T_UINT)=None
 )
     params_update_fn = None
 
@@ -25,7 +26,7 @@ function fit!(
 
     # Split up the training data into batches
     batches = get_batches(
-        nn.classes, num_batches, params.batch_size, train_data, targets
+        nn.classes, num_batches, params.batch_size, train_data, targets, input_map_size
     )
     # Free memory
     train_data, targets = 0, 0; gc()
@@ -37,7 +38,7 @@ function fit!(
 
     do_calculate_validation_loss = valid_data != None && valid_targets != None
     if do_calculate_validation_loss
-        valid_data = InputTensor(valid_data)
+        valid_data = InputTensor(valid_data, input_map_size)
         valid_target_output = get_target_output_matrix(nn.classes, valid_targets)
     end
 

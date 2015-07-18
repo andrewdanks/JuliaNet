@@ -34,7 +34,8 @@ function get_batches(
     num_batches::T_INT,
     batch_size::T_INT,
     data::Matrix{T_FLOAT},
-    target_classes::Vector
+    target_classes::Vector,
+    input_map_size
 )
     batches = Batch[]
     for i = 1:num_batches
@@ -42,7 +43,7 @@ function get_batches(
         batch_target_classes = get_ith_batch(target_classes, i, batch_size)
         batch_target_output = get_target_output_matrix(classes, batch_target_classes)
         push!(batches, Batch(
-            InputTensor(batch),
+            InputTensor(batch, input_map_size),
             batch_target_output,
             batch_target_classes
         ))
