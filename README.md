@@ -14,6 +14,7 @@ A deep neural network library for Julia. Features include:
 -   Random weight initializing based on fan-in/out heuristics [1]
 -   Dropout [2]
 -   Parallelization support
+-   Convolutional and pooling layer support
 
 The library is written such that it is easy to make modifications and
 customizations to the network structure and optimization strategies. In
@@ -42,9 +43,8 @@ Roadmap
 
 Near-future releases want to feature:
 
--   L1/L2 weight penalties
 -   Max incoming weight constraints and scaling
--   Convolutional and pooling layers
+-   Adaptive learning weights
 -   More test coverage
 
 See the Issues tab for a full list of planned features.
