@@ -1,37 +1,5 @@
 # Types applicable only to training
 
-type LinkedLayer{T<:NeuralLayer}
-    data_layer::T
-
-    prev::LinkedLayer
-    next::LinkedLayer
-
-    input::InputTensor
-    pre_activation::T_TENSOR
-    activation::InputTensor
-    grad_weights::T_TENSOR
-    weight_delta::T_TENSOR
-
-    prev_weight_delta::T_TENSOR
-    dropout_mask::Matrix
-
-    # for pooling layer only
-    max_masks::T_TENSOR
-
-    LinkedLayer(layer::T) = new(layer)
-end
-
-
-function has_prev(layer::LinkedLayer)
-    isdefined(layer, :prev)
-end
-
-
-function has_next(layer::LinkedLayer)
-    isdefined(layer, :next)
-end
-
-
 immutable type BatchResults
     grad_weights
     loss

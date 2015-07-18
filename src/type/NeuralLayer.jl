@@ -1,6 +1,38 @@
 abstract NeuralLayer
 
 
+type LinkedLayer{T<:NeuralLayer}
+    data_layer::T
+
+    prev::LinkedLayer
+    next::LinkedLayer
+
+    input::InputTensor
+    pre_activation::T_TENSOR
+    activation::InputTensor
+    grad_weights::T_TENSOR
+    weight_delta::T_TENSOR
+
+    prev_weight_delta::T_TENSOR
+    dropout_mask::Matrix
+
+    # for pooling layer only
+    max_masks::T_TENSOR
+
+    LinkedLayer(layer::T) = new(layer)
+end
+
+
+function has_prev(layer::LinkedLayer)
+    isdefined(layer, :prev)
+end
+
+
+function has_next(layer::LinkedLayer)
+    isdefined(layer, :next)
+end
+
+
 function update_weights!{T<:NeuralLayer}(layer::LinkedLayer{T}, params::HyperParams)
     prev_weight_delta = 0
     if params.momentum > 0 && isdefined(layer, :prev_weight_delta)
