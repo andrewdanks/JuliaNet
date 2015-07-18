@@ -126,7 +126,6 @@ function fit_epoch!(
         # This is a bit of a hack since there's only one property
         # in LinkedLayer that we want to maintain between batches
         linked_layers = get_linked_layers(nn.layers, linked_layers)
-        set_dropout_masks!(linked_layers, size(batch))
         fit_batch(nn, linked_layers, params, batch)
     end
 
@@ -197,14 +196,12 @@ function forward_pass!(
     layer::LinkedLayer
 )
     layer.input = input
-    layer.pre_activation = get_pre_activation(layer.data_layer.weights, input)
-    activation = layer.data_layer.activator.activation_fn(layer.pre_activation)
-    
-    if isdefined(layer, :dropout_mask)
-        activation = activation .* layer.dropout_mask
-    end
-
-    layer.activation = InputTensor(activation)
+    layer.pre_activation = get_pre_activation(layer.data_layer, input)
+    activation = InputTensor(
+        layer.data_layer.activator.activation_fn(layer.pre_activation)
+    )
+    activation = zero_out_with_prob(activation, layer.data_layer.dropout_coefficient)
+    layer.activation = activation
 
     if has_next(layer)
         forward_pass!(layer.activation, layer.next)
@@ -214,19 +211,31 @@ function forward_pass!(
 end
 
 
+function forward_pass(nn::NeuralNetwork, input::InputTensor)
+    for layer in nn.layers
+        pre_activation = get_pre_activation(layer, input)
+        if isdefined(layer, :dropout_coefficient)
+            pre_activation = pre_activation * (1 - layer.dropout_coefficient)
+        end
+
+        activation = layer.activator.activation_fn(pre_activation)
+        input = InputTensor(activation)
+    end
+    vectorized_data(input)
+end
+
+
 function backward_pass!(
     error_signal::T_TENSOR,
     layer::LinkedLayer
 )
-    layer.grad_weights = get_grad_weights(layer.input, error_signal)
+    layer.grad_weights = get_grad_weights(layer, error_signal)
     if has_prev(layer)
         prev_pre_activation = layer.prev.pre_activation
         backward_pass!(
-            get_grad_error_wrt_net(
-                layer.prev.data_layer.activator.grad_activation_fn,
-                layer.data_layer.weights,
-                layer.prev.pre_activation,
-                error_signal
+            format_error_signal(
+                layer.prev.data_layer,
+                get_grad_error_wrt_net(layer, error_signal)
             ),
             layer.prev
         )

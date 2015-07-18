@@ -31,7 +31,11 @@ type InputTensor
         InputTensor(input, reshape_dims)
     end
 
-    function InputTensor(input::T_2D_TENSOR, reshape_dims::(T_INT, T_INT))
+    function InputTensor(input::T_2D_TENSOR, reshape_dims::UnionType)
+        InputTensor(input)
+    end
+
+    function InputTensor(input::T_2D_TENSOR, reshape_dims::(T_UINT, T_UINT))
         size_input = size(input)
         batch_size = size_input[2]
         new_input = zeros(batch_size, 1, size_input[1])
@@ -96,15 +100,19 @@ function input_map_data(input_tensor::InputTensor, input_idx::T_INT, map_idx::T_
 end
 
 function zero_out_with_prob(input::InputTensor, prob::T_FLOAT)
-    new_input_data = zeros(size(input.data))
-    for x = 1:input.batch_size
-        for m = 1:input.num_maps
-            map_input = squeeze(input.data[x, m, :, :], (1, 2))
-            zero_out_map_input = zero_out_with_prob(map_input, prob)
-            new_input_data[x, m, :, :] = zero_out_map_input
+    if prob > 0
+        new_input_data = zeros(size(input.data))
+        for x = 1:input.batch_size
+            for m = 1:input.num_maps
+                map_input = squeeze(input.data[x, m, :, :], (1, 2))
+                zero_out_map_input = zero_out_with_prob(map_input, prob)
+                new_input_data[x, m, :, :] = zero_out_map_input
+            end
         end
+        InputTensor(new_input_data)
+    else
+        input
     end
-    InputTensor(new_input_data)
 end
 
 function Base.size(input_tensor::InputTensor, i)
