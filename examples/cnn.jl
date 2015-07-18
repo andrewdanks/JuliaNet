@@ -2,7 +2,7 @@ using JuliaNet
 using MNIST
 
 X, Y = MNIST.traindata()
-trainX, trainY = X[:, 1:5000], Y[1:5000]
+trainX, trainY = X[:, 1:10000], Y[1:10000]
 validX, validY = X[:, 50001:end], Y[50001:end]
 testX, testY = MNIST.testdata()
 
