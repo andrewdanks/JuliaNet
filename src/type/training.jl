@@ -30,9 +30,9 @@ end
 
 function get_chunk_from_batch(batch::Batch, range::UnitRange{T_INT})
     Batch(
-        InputTensor(get_batch_range(batch.input, range), batch.input.num_maps),
-        target_output[range,:],
-        target_classes[range]
+        InputTensor(get_batch_range(batch.input, range)),
+        batch.target_output[:, range],
+        batch.target_classes[range]
     )
 end
 

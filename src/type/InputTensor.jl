@@ -117,7 +117,7 @@ end
 
 
 function get_batch_range(input_tensor::InputTensor, range::UnitRange{T_INT})
-    vectorized_data(batch.input)[range,:]
+    vectorized_data(input_tensor)[:,range]
 end
 
 
@@ -140,4 +140,3 @@ end
 function ==(a::InputTensor, b::InputTensor)
     a.data == b.data
 end
-

@@ -8,7 +8,8 @@ function fit!(
     valid_targets::Vector{T_FLOAT}=None,
 
     verbose::Bool=true,
-    input_map_size::(T_UINT, T_UINT)=None
+    parallelize::Bool=false,
+    input_map_size::(T_UINT, T_UINT)=(1, size(train_data)[1])
 )
     params_update_fn = None
 
@@ -30,7 +31,21 @@ function fit!(
     )
     # Free memory
     train_data, targets = 0, 0; gc()
-    
+
+    batch_chunks = Vector[]
+    if parallelize
+        for batch in batches
+            chunks = Batch[]
+            batch_size = size(batch)
+            half_batch_size = int(batch_size/2)
+            chunk1 = get_chunk_from_batch(batch, UnitRange(1, half_batch_size))
+            chunk2 = get_chunk_from_batch(batch, UnitRange(1+half_batch_size, batch_size))
+            push!(chunks, chunk1)
+            push!(chunks, chunk2)
+            push!(batch_chunks, chunks)
+        end
+    end
+
     training_loss_history = T_FLOAT[]
     training_classifcation_error_history = T_FLOAT[]
     validation_loss_history = T_FLOAT[]
@@ -48,7 +63,9 @@ function fit!(
             println("==== Epoch ", current_epoch, " ====")
         end
 
-        training_loss, training_classification_error = fit_epoch!(nn, params, batches, false)
+        training_loss, training_classification_error = fit_epoch!(
+            nn, params, batches, parallelize, batch_chunks
+        )
 
         push!(training_loss_history, training_loss)
         push!(training_classifcation_error_history, training_classification_error)
@@ -120,31 +137,49 @@ function fit_epoch!(
     nn::NeuralNetwork,
     params::HyperParams,
     batches::Vector{Batch},
-    parallelize::Bool
+    parallelize::Bool,
+    batch_chunks::Vector
 )
     linked_layers = LinkedLayer[]
-    function call_func(batch::Batch)
+    num_batches = length(batches)
+
+    function fit_and_update(batch::Batch)
         # This is a bit of a hack since there's only one property
         # in LinkedLayer that we want to maintain between batches
         linked_layers = get_linked_layers(nn.layers, linked_layers)
-        fit_batch(nn, linked_layers, params, batch)
+        results = fit_batch(nn, linked_layers, params, batch)
+        if !parallelize
+            for (idx, layer) in enumerate(linked_layers)
+                update_weights!(layer, params)
+            end
+        end
+        return results
     end
 
     if parallelize
-        batch_results = mapreduce(
-            ref -> fetch(ref),
-            +, 
-            [@spawn call_func(batch) for batch in batches]
-        )
+        num_batches *= 2
+        all_batch_results = BatchResults[]
+        for (idx, batch) in enumerate(batches)
+            chunks = batch_chunks[idx]
+            batch_results = mapreduce(
+                ref -> fetch(ref), +, 
+                [@spawn fit_and_update(batch_chunk) for batch_chunk in chunks]
+            )
+            linked_layers = get_linked_layers(nn.layers, linked_layers)
+            for (idx, layer) in enumerate(linked_layers)
+                layer.grad_weights = batch_results.grad_weights[idx]
+                update_weights!(layer, params) 
+            end
+            push!(all_batch_results, batch_results)
+        end  
+        batch_results = reduce(+, all_batch_results)
     else
-        batch_results = reduce(
-            +, [call_func(batch) for batch in batches]
-        )
+        batch_results = reduce(+, [fit_and_update(batch) for batch in batches])
     end
 
     (
         batch_results.loss,
-        batch_results.classification_error / length(batches)
+        batch_results.classification_error / num_batches
     )
 end
 
@@ -158,7 +193,7 @@ function fit_batch(
     # Push the batch through the network and get the output and error
     output = forward_pass!(batch.input, linked_layers[1])
 
-    # Propagate the error signal back through the work and calculate the gradients
+    # Propagate the error signal back through the network and calculate the gradients
     error_signal = -linked_layers[end].data_layer.activator.grad_activation_fn(
         output, batch.target_output
     )
@@ -167,10 +202,6 @@ function fit_batch(
     grad_weights = [layer.grad_weights for layer in linked_layers]
     loss = params.loss_fn(output, batch.target_output)
     classification_error = test_error(predict(nn, output), batch.target_classes)
-
-    for (idx, layer) in enumerate(nn.layers)
-        update_weights!(linked_layers[idx], params)
-    end
 
     BatchResults(grad_weights, loss, classification_error)
 end
@@ -226,4 +257,3 @@ function backward_pass!(
         )
     end
 end
-
