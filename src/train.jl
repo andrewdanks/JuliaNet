@@ -216,7 +216,9 @@ function forward_pass!(
     activation = InputTensor(
         layer.data_layer.activator.activation_fn(layer.pre_activation)
     )
-    activation = zero_out_with_prob(activation, layer.data_layer.dropout_coefficient)
+    if layer.data_layer.dropout_coefficient > 0
+        activation = zero_out_with_prob(activation, layer.data_layer.dropout_coefficient)
+    end
     layer.activation = activation
 
     if has_next(layer)
