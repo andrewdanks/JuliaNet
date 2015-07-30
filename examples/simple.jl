@@ -49,8 +49,9 @@ fit!(
     nn,
     params,
     batches,
-    validation_batch
+    validation_batch,
+    parallelize=false
 )
 
-predictions = predict(nn, processed_textX, testY)
+predictions = predict(nn, textX, testY)
 println("test error: ", test_error(predictions, testY))
