@@ -29,24 +29,63 @@ function get_target_output_matrix(
 end
 
 
-function get_batches(
+function get_batch(
+    data::T_TENSOR,
     classes::Vector,
-    num_batches::T_INT,
+    target_classes::Vector
+)
+    get_batch(InputTensor(data), 1:length(target_classes), classes, target_classes)
+end
+
+
+function get_batch(
+    data::InputTensor,
+    range::UnitRange{T_INT},
+    classes::Vector,
+    target_classes::Vector
+)
+    Batch(
+        InputTensor(input_range(data, range)),
+        get_target_output_matrix(classes, target_classes[range]),
+        target_classes[range]  
+    ) 
+end
+
+
+function make_batches(
+    data::T_TENSOR,
     batch_size::T_INT,
-    data::Matrix{T_FLOAT},
-    target_classes::Vector,
-    input_map_size
+    classes::Vector,
+    target_classes::Vector
 )
     batches = Batch[]
-    for i = 1:num_batches
-        batch = get_ith_batch(data, i, batch_size)
-        batch_target_classes = get_ith_batch(target_classes, i, batch_size)
-        batch_target_output = get_target_output_matrix(classes, batch_target_classes)
+    data_tensor = InputTensor(data)
+    i = 1
+    while i <= data_tensor.batch_size
+        range = i:min(i + batch_size - 1, data_tensor.batch_size)
+        push!(batches, get_batch(data_tensor, range, classes, target_classes))
+        i += batch_size
+    end
+    batches
+end
+
+
+function make_batches(
+    data::T_TENSOR,
+    target_data::T_TENSOR,
+    batch_size::T_INT
+)
+    batches = Batch[]
+    data_tensor = InputTensor(data)
+    i = 1
+    data_size = size(data)[1]
+    while i <= data_size
+        range = i:(i+batch_size)
         push!(batches, Batch(
-            InputTensor(batch, input_map_size),
-            batch_target_output,
-            batch_target_classes
+            InputTensor(input_range(data_tensor, range)),
+            target_data[range, :], #todo: how to do this for higher dims?
         ))
+        i += batch_size + 1
     end
     batches
 end

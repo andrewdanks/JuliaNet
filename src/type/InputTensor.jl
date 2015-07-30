@@ -86,6 +86,13 @@ function input_data(input_tensor::InputTensor, input_idx::T_INT)
     ret
 end
 
+function input_range(input_tensor::InputTensor, input_range::UnitRange{T_INT})
+    @assert 1 <= input_range.start <= input_tensor.batch_size
+    @assert 1 <= input_range.stop <= input_tensor.batch_size
+    @inbounds ret = input_tensor.data[input_range, :, :, :]
+    ret
+end
+
 function map_data(input_tensor::InputTensor, map_idx::T_INT)
     @assert 1 <= map_idx <= input_tensor.num_maps
     @inbounds ret = squeeze(input_tensor.data[:, map_idx, :, :], 2)
@@ -113,11 +120,6 @@ function zero_out_with_prob(input::InputTensor, prob::T_FLOAT)
     else
         input
     end
-end
-
-
-function get_batch_range(input_tensor::InputTensor, range::UnitRange{T_INT})
-    vectorized_data(input_tensor)[:,range]
 end
 
 

@@ -6,9 +6,9 @@ trainX, trainY = X[:, 1:5000], Y[1:5000]
 validX, validY = X[:, 50001:end], Y[50001:end]
 testX, testY = MNIST.testdata()
 
-prcoessed_trainX = unit_variance(zero_mean(trainX))
-processed_validX = unit_variance(zero_mean(validX))
-processed_textX = unit_variance(zero_mean(testX))
+trainX = unit_variance(zero_mean(trainX))
+validX = unit_variance(zero_mean(validX))
+textX = unit_variance(zero_mean(testX))
 
 num_features = 28 * 28
 num_classes = 10
@@ -34,7 +34,10 @@ hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
 hidden_layers[1].dropout_coefficient = 0.5
 hidden_layers[2].dropout_coefficient = 0.5
 
-net = NeuralNetwork(vcat(hidden_layers, output_layer))
+classes = [0,1,2,3,4,5,6,7,8,9]
+nn = NeuralNetwork(vcat(hidden_layers, output_layer), classes)
+batches = make_batches(trainX, 100, classes, trainY)
+validation_batch = get_batch(validX, classes, validY)
 
 params = HyperParams()
 params.batch_size = 100
@@ -43,13 +46,11 @@ params.momentum = 0.4
 params.learning_rate = 0.7
 
 fit!(
-    net,
-    prcoessed_trainX,
-    trainY,
+    nn,
     params,
-    valid_data=processed_validX,
-    valid_targets=validY,
+    batches,
+    validation_batch
 )
 
-predictions = predict(net, processed_textX, testY)
+predictions = predict(nn, processed_textX, testY)
 println("test error: ", test_error(predictions, testY))

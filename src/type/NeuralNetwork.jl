@@ -1,9 +1,10 @@
 type NeuralNetwork
     layers::Vector{NeuralLayer}
-    classes::Vector{Number}
+    classes::Vector
 
     NeuralNetwork() = new(NeuralLayer[])
     NeuralNetwork{T<:NeuralLayer}(layers::Vector{T}) = new(layers)
+    NeuralNetwork{T<:NeuralLayer}(layers::Vector{T}, classes::Vector) = new(layers, classes)
 end
 
 

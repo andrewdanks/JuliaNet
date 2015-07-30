@@ -57,7 +57,9 @@ export cross_entropy_loss
        mean_squared_error
 
 export zero_mean,
-       unit_variance
+       unit_variance,
+       get_batch,
+       make_batches
 
 export IDENTITY_ACTIVATOR,
        SIGMOID_ACTIVATOR,
