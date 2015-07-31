@@ -16,7 +16,8 @@ function lecun_tanh(x)
 end
 
 function grad_lecun_tanh(x)
-    1.14393 * (1 - tanh(2/3 * x))  
+    #1.14393 * (1 - tanh(2/3 * x))  
+    1.7159 * 2/3 * (1 - 1/(1.7159)^2 * x .^ 2)
 end
 
 function softmax(input::Matrix{T_FLOAT})

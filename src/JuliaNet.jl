@@ -53,7 +53,7 @@ export FullyConnectedHiddenLayers,
        FullyConnectedOutputLayer,
        FullyConnectedHiddenAndOutputLayers
 
-export cross_entropy_loss,
+export cross_entropy_error,
        mean_squared_error
 
 export zero_mean,
