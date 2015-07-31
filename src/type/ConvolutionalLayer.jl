@@ -16,23 +16,14 @@ type ConvolutionalLayer <: FeatureMapLayer
         kernel_size::T_2D,
         num_maps::T_INT,
         activator::Activator,
-        weight_sampler::Function
+        weight_sampler::Function=default_weight_sampler
     )
-        # An input to the network is generally:
-        # <num features> x <num data vectors> x <num channels>
-        # <batch size> x <num feature maps or channels> x <data cols> x <data rows>
-        # Unless the data represents an image, for example, <data rows> will just be 1.
-
         map_size = get_feature_map_size(input_map_size, kernel_size)
 
-        # All units in a feature map share the same set of weights
-        weights = zeros(num_input_maps, num_maps, kernel_size[1], kernel_size[2])
-        for i = 1:num_maps
-            for j = 1:num_input_maps
-                receptive_field_weights = weight_sampler(kernel_size[1], kernel_size[2])
-                weights[j, i, :, :] = receptive_field_weights
-            end
-        end
+        weights = make_weights(
+            (num_input_maps, num_maps, kernel_size[1], kernel_size[2]),
+            default_weight_sampler
+        )
 
         new(
             activator,
@@ -43,14 +34,6 @@ type ConvolutionalLayer <: FeatureMapLayer
             num_input_maps
         )
     end
-end
-
-
-function update_weights!(
-    linked_layer::LinkedLayer{ConvolutionalLayer},
-    params::HyperParams
-)
-    # no-op
 end
 
 

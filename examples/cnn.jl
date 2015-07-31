@@ -1,71 +1,59 @@
 using JuliaNet
 using MNIST
 
+srand(34455)
+
 X, Y = MNIST.traindata()
-trainX, trainY = X[:, 1:10000], Y[1:10000]
+trainX, trainY = X[:, 1:50000], Y[1:50000]
 validX, validY = X[:, 50001:end], Y[50001:end]
 testX, testY = MNIST.testdata()
 
-prcoessed_trainX = unit_variance(zero_mean(trainX))
-processed_validX = unit_variance(zero_mean(validX))
-processed_textX = unit_variance(zero_mean(testX))
+trainX = unit_variance(zero_mean(trainX))
+validX = unit_variance(zero_mean(validX))
+textX = unit_variance(zero_mean(testX))
 
-function sample_weights(rows, cols=1)
-    val = 4 * sqrt(6 / (rows + cols))
-    rand_range(-val, val, rows, cols)
-end
-
-function sample_weights(dims::(Number, Number))
-    sample_weights(dims[1], dims[2])
-end
-
-num_classes = 10
 input_maps = 1
 input_map_size = (28, 28)
+classes = [0,1,2,3,4,5,6,7,8,9]
+num_classes = length(classes)
 
-srand(123)
-
-conv_layer1 = ConvolutionalLayer(
+conv_layer = ConvolutionalLayer(
     input_maps, input_map_size,
     (5, 5), 4,
-    TANH_ACTIVATOR,
-    sample_weights
+    TANH_ACTIVATOR
 )
 
-pooling_layer1 = PoolingLayer(
-    conv_layer1.num_maps,
-    conv_layer1.feature_map_size,
+pooling_layer = PoolingLayer(
+    conv_layer.num_maps,
+    conv_layer.feature_map_size,
     (2, 2)
 )
 
-cnn_layers = vcat(conv_layer1, pooling_layer1)
-
+cnn_layers = vcat(conv_layer, pooling_layer)
 
 hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
-    size(cnn_layers[end]),
-    [800, 800],
-    num_classes,
-    sample_weights,
-    SIGMOID_ACTIVATOR
+    size(cnn_layers[end]), [1200, 1200], num_classes, SIGMOID_ACTIVATOR
 )
+hidden_layers[1].dropout_coefficient = 0.5
+hidden_layers[2].dropout_coefficient = 0.5
 
-net = NeuralNetwork(vcat(cnn_layers, hidden_layers, output_layer))
+nn = NeuralNetwork(vcat(cnn_layers, hidden_layers, output_layer), classes)
+batches = make_batches(trainX, 100, classes, trainY, input_map_size)
+validation_batch = make_batch(validX, classes, validY, input_map_size)
 
 params = HyperParams()
 params.batch_size = 100
-params.epochs = 5
+params.epochs = 10
 params.momentum = 0.4
 params.learning_rate = 0.7
 
 fit!(
-    net,
-    prcoessed_trainX,
-    trainY,
+    nn,
     params,
-    valid_data=processed_validX,
-    valid_targets=validY,
-    input_map_size=input_map_size
+    batches,
+    validation_batch,
+    parallelize=false
 )
 
-predictions = predict(net, InputTensor(processed_textX, input_map_size), testY)
+predictions = predict(nn, textX, testY)
 println("test error: ", test_error(predictions, testY))

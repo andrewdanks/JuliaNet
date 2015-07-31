@@ -35,5 +35,5 @@ function grad_squared_error(
     actual_output::Matrix{T_FLOAT},
     target_output::Matrix{T_FLOAT}
 )
-    target_output - actual_output
+    actual_output - target_output
 end

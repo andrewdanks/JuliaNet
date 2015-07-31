@@ -7,10 +7,10 @@ include("constants.jl")
 
 include("util/activation.jl")
 
-# Data types
 include("type/HyperParams.jl")
 include("type/Activator.jl")
 include("type/InputTensor.jl")
+include("preprocess.jl")
 include("type/NeuralLayer.jl")
 include("type/training.jl")
 include("type/HiddenLayer.jl")
@@ -32,7 +32,6 @@ include("train.jl")
 include("score.jl")
 include("early_stopping.jl")
 include("loss.jl")
-include("preprocess.jl")
 
 export fit!,
        predict,
@@ -42,6 +41,7 @@ export fit!,
        accuracy
 
 export NeuralNetwork,
+       Autoencoder,
        HiddenLayer,
        OutputLayer,
        ConvolutionalLayer,
@@ -53,18 +53,21 @@ export FullyConnectedHiddenLayers,
        FullyConnectedOutputLayer,
        FullyConnectedHiddenAndOutputLayers
 
-export cross_entropy_loss
+export cross_entropy_loss,
        mean_squared_error
 
 export zero_mean,
        unit_variance,
-       get_batch,
+       make_batch,
        make_batches
 
 export IDENTITY_ACTIVATOR,
        SIGMOID_ACTIVATOR,
        TANH_ACTIVATOR,
-       SOFTMAX_ACTIVATOR
+       SOFTMAX_ACTIVATOR,
+       Activator
+
+export sigmoid, grad_sigmoid, grad_tanh, grad_squared_error
 
 export rand_range
 

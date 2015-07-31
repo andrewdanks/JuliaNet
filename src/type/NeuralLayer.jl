@@ -65,6 +65,9 @@ function get_grad_error_wrt_net{T<:NeuralLayer}(
     grad_activation_fn = layer.prev.data_layer.activator.grad_activation_fn
     weights = layer.data_layer.weights
     prev_pre_activation = vectorized_data(InputTensor(layer.prev.pre_activation))
+    # println("error_signal", size(error_signal))
+    # println("weights", size(layer.data_layer.weights))
+    # println("prev_pre_activation", size(prev_pre_activation))
     (weights * error_signal) .* grad_activation_fn(prev_pre_activation)
 end
 

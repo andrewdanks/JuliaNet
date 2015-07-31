@@ -4,12 +4,40 @@ function zero_mean(M::Matrix{T_FLOAT})
     M - means
 end
 
+
 function unit_variance(M::Matrix{T_FLOAT})
     _, num_cols = size(M)
     std_devs = sqrt(var(M, 2))
     std_devs[find(x -> x == 0, std_devs)] = 1.
     std_devs = repmat(std_devs, 1, num_cols)
     M ./ std_devs
+end
+
+
+function default_weight_sampler(dims::(T_UINT, T_UINT))
+    default_weight_sampler(dims[1], dims[2])
+end
+
+
+function default_weight_sampler(rows::T_UINT, cols::T_UINT=1)
+    val = 4 * sqrt(6 / (rows + cols))
+    rand_range(-val, val, rows, cols)
+end
+
+
+function make_weights(dims::T_2D, weight_sampler::Function=default_weight_sampler)
+    weight_sampler(dims)
+end
+
+
+function make_weights(dims::T_4D, weight_sampler::Function=default_weight_sampler)
+    weights = zeros(dims)
+    for i = 1:dims[2]
+        for j = 1:dims[1]
+            weights[j, i, :, :] = weight_sampler(dims[3], dims[4])
+        end
+    end
+    weights
 end
 
 
@@ -29,16 +57,22 @@ function get_target_output_matrix(
 end
 
 
-function get_batch(
+function make_batch(
     data::T_TENSOR,
     classes::Vector,
-    target_classes::Vector
+    target_classes::Vector,
+    input_map_size=None
 )
-    get_batch(InputTensor(data), 1:length(target_classes), classes, target_classes)
+    if input_map_size != None
+        data_tensor = InputTensor(data, input_map_size)
+    else
+        data_tensor = InputTensor(data)
+    end
+    make_batch(data_tensor, 1:length(target_classes), classes, target_classes)
 end
 
 
-function get_batch(
+function make_batch(
     data::InputTensor,
     range::UnitRange{T_INT},
     classes::Vector,
@@ -56,36 +90,51 @@ function make_batches(
     data::T_TENSOR,
     batch_size::T_INT,
     classes::Vector,
-    target_classes::Vector
+    target_classes::Vector,
+    input_map_size=None
 )
     batches = Batch[]
-    data_tensor = InputTensor(data)
+    if input_map_size != None
+        data_tensor = InputTensor(data, input_map_size)
+    else
+        data_tensor = InputTensor(data)
+    end
     i = 1
     while i <= data_tensor.batch_size
         range = i:min(i + batch_size - 1, data_tensor.batch_size)
-        push!(batches, get_batch(data_tensor, range, classes, target_classes))
+        push!(batches, make_batch(data_tensor, range, classes, target_classes))
         i += batch_size
     end
     batches
 end
 
 
+function make_batch(
+    data::T_TENSOR,
+    input_map_size=None
+)
+    if input_map_size != None
+        input = InputTensor(data, input_map_size)
+    else
+        input = InputTensor(data)
+    end
+    Batch(input, vectorized_data(input))
+end
+
+
 function make_batches(
     data::T_TENSOR,
-    target_data::T_TENSOR,
-    batch_size::T_INT
+    batch_size::T_INT,
+    input_map_size=None
 )
     batches = Batch[]
     data_tensor = InputTensor(data)
     i = 1
-    data_size = size(data)[1]
-    while i <= data_size
-        range = i:(i+batch_size)
-        push!(batches, Batch(
-            InputTensor(input_range(data_tensor, range)),
-            target_data[range, :], #todo: how to do this for higher dims?
-        ))
-        i += batch_size + 1
+    while i <= data_tensor.batch_size
+        range = i:min(i + batch_size - 1, data_tensor.batch_size)
+        input = input_range(data_tensor, range)
+        push!(batches, make_batch(input, input_map_size))
+        i += batch_size
     end
     batches
 end

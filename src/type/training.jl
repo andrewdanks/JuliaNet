@@ -63,12 +63,14 @@ immutable type BatchResults
     grad_weights
     loss
     classification_error
+    BatchResults(grad_weights, loss) = new(grad_weights, loss)
 end
 
 
 immutable type EpochResults
     loss
     classification_error
+    EpochResults(loss) = new(loss)
 end
 
 
@@ -90,8 +92,11 @@ end
 
 immutable type Batch
     input::InputTensor
-    target_output::Matrix
+    target_output::T_TENSOR
     target_classes::Vector
+
+    Batch(input::InputTensor, target_output::T_TENSOR) = new(input, target_output)
+    Batch(input::InputTensor, target_output::T_TENSOR, target_classes::Vector) = new(input, target_output, target_classes)
 end
 
 

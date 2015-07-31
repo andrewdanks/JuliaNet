@@ -3,8 +3,6 @@ type HiddenLayer <: NeuralLayer
     # to the input before it goes to the next layer
     activator::Activator
 
-    connections::Matrix
-
     # Dimensions: <pevious layer size x this layer size>
     # Each row corresponds to a neuron, so it represents the incoming
     # weights to that neuron. I.e., the value of (i,j) is the weight
@@ -18,14 +16,16 @@ type HiddenLayer <: NeuralLayer
     # undefined properties by default
     dropout_coefficient::T_FLOAT
 
+    HiddenLayer(activator::Activator, weights::Matrix{T_FLOAT}) = new(activator, weights)
+
     function HiddenLayer(
+        activator::Activator,
+
         # Dimensions: <pevious layer size x this layer size>
         # Matrix of 1s and 0s where 1s indicate where a connection is present
         # (i,j) == 1 indicate that neuron i in previous layer connects to
         # neuron j in this layer
         connections::Matrix{T_INT},
-
-        activator::Activator,
         
         # A function that can take a variable number of integer arguments
         # representing the dimensions of a vector or matrix that should
@@ -38,23 +38,17 @@ type HiddenLayer <: NeuralLayer
         # Zero-out the spots where there are no connections
         weights = weights .* connections
 
-        biases = vectorize(zeros(this_layer_size, 1))
-
-        new(
-            activator,
-            connections,
-            weights
-        )
+        new(activator, weights)
     end
 
 end
 
 
 function input_size(layer::HiddenLayer)
-    ize(layer.connections)[1]
+    size(layer.weights)[1]
 end
 
 
 function Base.size(layer::HiddenLayer)
-    size(layer.connections)[2]
+    size(layer.weights)[2]
 end

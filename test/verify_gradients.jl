@@ -1,10 +1,9 @@
 using JuliaNet
 using Base.Test
 
-EPSILON = 1e-6
+EPSILON = 1e-5
 ERROR_THRESHOLD = 1e-7
-LOSS_FN = cross_entropy_loss
-#LOSS_FN = JuliaNet.mean_squared_error
+LOSS_FN = mean_squared_error
 
 srand(12345)
 input_dimensions = (16, 16)
@@ -21,43 +20,39 @@ classes = sort(unique(Y))
 num_classes = length(classes)
 
 
-function nn_output_finite_difference(nn::NeuralNetwork, params, layer_idx, epsilon, input_tensor, idx)
-    nn_copy = deepcopy(nn)
-    layer = nn_copy.layers[layer_idx]
-    layer.weights[idx] += epsilon
-    JuliaNet.forward_pass!(nn_copy, params, input_tensor)
+function nn_output_finite_difference(nn, layer_idx, epsilon, batch, idx)
+    nn.layers[layer_idx].weights[idx] += epsilon
+    JuliaNet.forward_pass(nn, batch.input)
 end
 
 
-function verify_gradients(nn::NeuralNetwork, params, input_tensor, y, target_output)
+function verify_gradients(nn, linked_layers, params, batch)
     num_bad_grads = 0
     total = 0
     sum_bad_e = 0.
 
-    ignored_layers = [PoolingLayer]
+    for L = 1:length(nn.layers)
+        layer = linked_layers[L]
+        num_weights = length(layer.data_layer.weights)
+        for i = 1:num_weights
+            output1 = nn_output_finite_difference(nn, L, EPSILON, batch, i)
+            output2 = nn_output_finite_difference(nn, L, -EPSILON, batch, i)
 
-    for L = 2:size(nn)
-        layer = deepcopy(nn.layers[L])
-        if !(typeof(layer) in ignored_layers)
-            num_weights = length(layer.weights)
-            for i = 1:num_weights
-                output1 = nn_output_finite_difference(nn, params, L, EPSILON, input_tensor, i)
-                output2 = nn_output_finite_difference(nn, params, L, -EPSILON, input_tensor, i)
+            loss1 = LOSS_FN(output1, batch.target_output)
+            loss2 = LOSS_FN(output2, batch.target_output)
 
-                loss1 = LOSS_FN(output1, target_output)
-                loss2 = LOSS_FN(output2, target_output)
+            delta = (loss1 - loss2) / (2 * EPSILON)
 
-                delta = (loss1 - loss2) / (2 * EPSILON)
+            e = abs(delta - layer.grad_weights[i])
 
-                e = abs(delta - layer.grad_weights[i])
+            relative_error = e / (abs(delta) + abs(layer.grad_weights[i]))
 
-                if e > ERROR_THRESHOLD
-                    #println("L", L, "; (",i,"); ", e)
-                    num_bad_grads += 1
-                    sum_bad_e += e
-                end
-                total += 1
+            if e > ERROR_THRESHOLD
+                #println("L", L, "; (",i,"); ", e)
+                num_bad_grads += 1
+                sum_bad_e += e
             end
+            total += 1
         end
     end
 
@@ -66,44 +61,37 @@ function verify_gradients(nn::NeuralNetwork, params, input_tensor, y, target_out
         println("mean_bad_e: ", sum_bad_e / num_bad_grads)
         println("sum_bad_e: ", sum_bad_e)
         println("total: ", total)
+        false
     else
         println("Success!")
+        true
     end
 end
 
 
 function verify_networks(nns::Vector{NeuralNetwork})
-
     params = HyperParams()
     params.learning_rate = 1.0
     params.epochs = 1
-
-    for batch_size in [100]
-        params.batch_size = batch_size
-        for momentum in [0.]
-            params.momentum = momentum
-            for nn in nns
-                my_nn = deepcopy(nn)
-                input_tensor = JuliaNet.format_input(JuliaNet.input_layer(my_nn), X)
-                output = JuliaNet.forward_pass!(my_nn, params, input_tensor)
-                target_output = JuliaNet.target_output_matrix(classes, Y)
-                JuliaNet.backward_pass!(my_nn, params, output, target_output)
-                verify_gradients(my_nn, params, input_tensor, Y, target_output)
-                println("=================================")
-            end
-        end
+    for nn in nns
+        my_nn = deepcopy(nn)
+        linked_layers = JuliaNet.get_linked_layers(nn.layers)
+        batch = make_batch(X, classes, Y)
+        JuliaNet.fit_batch!(linked_layers, batch)
+        is_correct = verify_gradients(my_nn, linked_layers, params, batch)
+        println("=================================")
     end
 end
 
 
 function make_simple_network()
-    srand(123)
     hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
         num_features,
         [15, 25],
         num_classes,
-        sample_weights,
-        SIGMOID_ACTIVATOR
+        SIGMOID_ACTIVATOR,
+        SOFTMAX_ACTIVATOR,
+        JuliaNet.default_weight_sampler
     )
     NeuralNetwork(vcat(hidden_layers, output_layer))
 end
