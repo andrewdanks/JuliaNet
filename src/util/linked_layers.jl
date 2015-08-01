@@ -1,12 +1,14 @@
 function get_linked_layers{T<:NeuralLayer}(layers::Vector{T})
     linked_layers = [LinkedLayer{typeof(layer)}(layer) for layer in layers]
 
-    linked_layers[1].next = linked_layers[2]
-    for i = 2:length(linked_layers)-1
-        linked_layers[i].prev = linked_layers[i-1]
-        linked_layers[i].next = linked_layers[i+1]
+    if length(linked_layers) > 1
+        linked_layers[1].next = linked_layers[2]
+        for i = 2:length(linked_layers)-1
+            linked_layers[i].prev = linked_layers[i-1]
+            linked_layers[i].next = linked_layers[i+1]
+        end
+        linked_layers[end].prev = linked_layers[end-1]
     end
-    linked_layers[end].prev = linked_layers[end-1]
 
     linked_layers
 end

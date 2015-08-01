@@ -34,6 +34,7 @@ include("early_stopping.jl")
 include("loss.jl")
 
 export fit!,
+       forward_pass,
        predict,
        get_output,
        test_error,
@@ -42,6 +43,7 @@ export fit!,
 
 export NeuralNetwork,
        Autoencoder,
+       StackedAutoencoder,
        HiddenLayer,
        OutputLayer,
        ConvolutionalLayer,

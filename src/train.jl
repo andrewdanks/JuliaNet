@@ -174,6 +174,11 @@ function forward_pass(nn::NeuralNetwork, input::InputTensor)
 end
 
 
+function forward_pass(nn::NeuralNetwork, batch::Batch)
+    forward_pass(nn, batch.input)
+end
+
+
 function backward_pass!(
     error_signal::T_TENSOR,
     layer::LinkedLayer
