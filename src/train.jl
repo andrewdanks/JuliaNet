@@ -125,9 +125,9 @@ function fit_batch!(
 )
     output = forward_pass!(batch.input, linked_layers[1])
 
-    grad_activation_fn = linked_layers[end].data_layer.activator.grad_activation_fn
+    ∇activate = linked_layers[end].data_layer.∇activate
     pre_activation = linked_layers[end].pre_activation
-    error_signal = grad_squared_error(output, batch.target_output) .* grad_activation_fn(pre_activation)
+    error_signal = grad_squared_error(output, batch.target_output) .* ∇activate(pre_activation)
     backward_pass!(error_signal, linked_layers[end])
 
     output
@@ -141,7 +141,7 @@ function forward_pass!(
     layer.input = input  # TODO: this is a waste of memory
     layer.pre_activation = get_pre_activation(layer.data_layer, input)
     activation = InputTensor(
-        layer.data_layer.activator.activation_fn(layer.pre_activation)
+        layer.data_layer.activate(layer.pre_activation)
     )
     if layer.data_layer.dropout_coefficient > 0
         activation = zero_out_with_prob(activation, layer.data_layer.dropout_coefficient)
@@ -163,7 +163,7 @@ function forward_pass(nn::NeuralNetwork, input::InputTensor)
             pre_activation = pre_activation .* (1 - layer.dropout_coefficient)
         end
 
-        activation = layer.activator.activation_fn(pre_activation)
+        activation = layer.activate(pre_activation)
         input = InputTensor(activation)
     end
     vectorized_data(input)

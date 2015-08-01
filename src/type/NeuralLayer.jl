@@ -14,10 +14,12 @@ type LinkedLayer{T<:NeuralLayer}
     weight_delta::T_TENSOR
 
     prev_weight_delta::T_TENSOR
-    dropout_mask::Matrix
 
     # for pooling layer only
     max_masks::T_TENSOR
+
+    # contrain this layers weights to be the same as this one
+    tied_weights::LinkedLayer
 
     LinkedLayer(layer::T) = new(layer)
 end
@@ -62,10 +64,10 @@ function get_grad_error_wrt_net{T<:NeuralLayer}(
     layer::LinkedLayer{T},
     error_signal::T_2D_TENSOR
 )
-    grad_activation_fn = layer.prev.data_layer.activator.grad_activation_fn
+    ∇activate = layer.prev.data_layer.∇activate
     weights = layer.data_layer.weights
     prev_pre_activation = vectorized_data(InputTensor(layer.prev.pre_activation))
-    (weights * error_signal) .* grad_activation_fn(prev_pre_activation)
+    (weights * error_signal) .* ∇activate(prev_pre_activation)
 end
 
 

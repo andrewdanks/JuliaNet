@@ -1,6 +1,6 @@
 immutable type Activator
-    activation_fn::Function
-    grad_activation_fn::Function
+    activate::Function
+    ∇activate::Function
 end
 
 

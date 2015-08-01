@@ -1,5 +1,6 @@
 type PoolingLayer <: FeatureMapLayer
-    activator::Activator
+    activate::Function
+    ∇activate::Function
 
     feature_map_size::T_2D
     kernel_size::T_2D
@@ -8,9 +9,6 @@ type PoolingLayer <: FeatureMapLayer
     num_input_maps::T_UINT
 
     max_masks::T_TENSOR
-
-    # undefined properties by default
-    dropout_coefficient::T_FLOAT
 
     function PoolingLayer(
         num_input_maps::T_UINT,
@@ -25,7 +23,8 @@ type PoolingLayer <: FeatureMapLayer
         layer_size = prod(map_size) * num_maps
 
         new(
-            IDENTITY_ACTIVATOR,
+            IDENTITY_ACTIVATOR.activate,
+            IDENTITY_ACTIVATOR.∇activate,
             map_size,
             kernel_size,
             input_map_size,
@@ -123,8 +122,7 @@ function get_grad_error_wrt_net(
         layer.prev.data_layer.feature_map_size[2]
     )
 
-    layer_grad_activation = layer.data_layer.activator.grad_activation_fn
-    grad_activation_fn = layer.prev.data_layer.activator.grad_activation_fn
+    ∇activate = layer.prev.data_layer.∇activate
 
     for x = 1:batch_size
         for i = 1:layer.data_layer.num_maps
@@ -133,7 +131,7 @@ function get_grad_error_wrt_net(
             # but is more efficient here since we're already iterating over the batch
             #map_error = map_error .* grad_activation_fn(squeeze(layer.pre_activation[x, i, :, :], (1, 2)))
             max_mask = squeeze(layer.data_layer.max_masks[x, i, :, :], (1, 2))
-            grad_pre_activation = squeeze(grad_activation_fn(
+            grad_pre_activation = squeeze(∇activate(
                 layer.prev.pre_activation[x, i, :, :]
             ), (1, 2))
             next_error_signal[x, i, :, :] = max_mask .* grad_pre_activation .* upsample(layer.data_layer, map_error)

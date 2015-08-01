@@ -1,7 +1,6 @@
 type HiddenLayer <: NeuralLayer
-    # Activator is responsible for doing any transformations
-    # to the input before it goes to the next layer
-    activator::Activator
+    activate::Function
+    ∇activate::Function
 
     # Dimensions: <pevious layer size x this layer size>
     # Each row corresponds to a neuron, so it represents the incoming

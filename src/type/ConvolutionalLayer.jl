@@ -1,14 +1,13 @@
 type ConvolutionalLayer <: FeatureMapLayer
-    activator::Activator
+    activate::Function
+    ∇activate::Function
+
     weights::T_4D_TENSOR
 
     feature_map_size::T_2D
     kernel_size::T_2D
     num_maps::T_UINT
     num_input_maps::T_UINT
-
-    # undefined properties by default
-    dropout_coefficient::T_FLOAT
 
     function ConvolutionalLayer(
         num_input_maps::T_UINT,
@@ -26,7 +25,8 @@ type ConvolutionalLayer <: FeatureMapLayer
         )
 
         new(
-            activator,
+            activator.activate,
+            activator.∇activate,
             weights,
             map_size,
             kernel_size,
