@@ -12,22 +12,30 @@ function Autoencoder(
     input_size::T_UINT,
     hidden_layer_size::T_UINT,
     activator::Activator,
+    corruption_level::T_FLOAT=0.0,
     weight_sampler::Function=default_weight_sampler
 )
-    NeuralNetwork([
-        HiddenLayer(activator, weight_sampler(input_size, hidden_layer_size))
-        HiddenLayer(activator, weight_sampler(hidden_layer_size, input_size))
-    ])
+    StackedAutoencoder(input_size, [hidden_layer_size], activator, [corruption_level], weight_sampler)
 end
 
 
-function Base.push!(nn::NeuralNetwork, layer::NeuralLayer)
-    push!(nn.layers, layer)
-end
+function StackedAutoencoder(
+    input_size::T_UINT,
+    hidden_layer_sizes::Vector{T_UINT},
+    activator::Activator,
+    corruption_levels::Vector{T_FLOAT}=zeros(length(hidden_layer_sizes))
+    weight_sampler::Function=default_weight_sampler
+)
+    layers = HiddenLayer[]
+    for (idx, layer_size) in enumerate(hidden_layer_sizes)
+        corruption_level = corruption_levels[idx]
+        first_layer = HiddenLayer(activator, weight_sampler(input_size, layer_size))
+        first_layer.corruption_level = corruption_level
+        push!(layers, first_layer)
+        push!(layers, HiddenLayer(activator, weight_sampler(layer_size, input_size)))
+    end
 
-
-function Base.push!(nn::NeuralNetwork, layer::ConvolutionalLayer)
-    push!(nn.layers, layer)
+    NeuralNetwork(layers)
 end
 
 

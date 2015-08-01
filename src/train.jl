@@ -138,6 +138,10 @@ function forward_pass!(
     input::InputTensor,
     layer::LinkedLayer
 )
+    if layer.data_layer.corruption_level > 0
+        input = zero_out_with_prob(input, layer.data_layer.corruption_level)
+    end
+
     layer.input = input  # TODO: this is a waste of memory
     layer.pre_activation = get_pre_activation(layer.data_layer, input)
     activation = InputTensor(
@@ -159,7 +163,7 @@ end
 function forward_pass(nn::NeuralNetwork, input::InputTensor)
     for layer in nn.layers
         pre_activation = get_pre_activation(layer, input)
-        if isdefined(layer, :dropout_coefficient) && layer.dropout_coefficient > 0
+        if layer.dropout_coefficient > 0
             pre_activation = pre_activation .* (1 - layer.dropout_coefficient)
         end
 

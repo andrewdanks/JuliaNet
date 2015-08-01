@@ -12,10 +12,12 @@ type HiddenLayer <: NeuralLayer
     # Each component i represents the bias for the i'th neuron
     # biases::Vector{T_FLOAT}
 
-    # undefined properties by default
     dropout_coefficient::T_FLOAT
+    corruption_level::T_FLOAT
 
-    HiddenLayer(activator::Activator, weights::Matrix{T_FLOAT}) = new(activator, weights)
+    HiddenLayer(activator::Activator, weights::Matrix{T_FLOAT}) = (
+        new(activator.activate, activator.∇activate, weights, 0.0, 0.0)
+    )
 
     function HiddenLayer(
         activator::Activator,
@@ -31,13 +33,11 @@ type HiddenLayer <: NeuralLayer
         # be returned with samples from some distribution
         weight_sampler::Function
     )
-        prev_layer_size, this_layer_size = size(connections)
-
-        weights = weight_sampler(prev_layer_size, this_layer_size)
-        # Zero-out the spots where there are no connections
+        weights = weight_sampler(size(connections))
+        # Zero-out the spots where we want no connections
         weights = weights .* connections
 
-        new(activator, weights)
+        new(activator.activate, activator.∇activate, weights, 0.0, 0.0)
     end
 
 end
