@@ -23,7 +23,7 @@ function StackedAutoencoder(
     input_size::T_UINT,
     hidden_layer_sizes::Vector{T_UINT},
     activator::Activator,
-    corruption_levels::Vector{T_FLOAT}=zeros(length(hidden_layer_sizes))
+    corruption_levels::Vector{T_FLOAT}=zeros(length(hidden_layer_sizes)),
     weight_sampler::Function=default_weight_sampler
 )
     layers = HiddenLayer[]
