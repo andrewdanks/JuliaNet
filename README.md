@@ -18,6 +18,7 @@ A deep neural network library for Julia. Features include:
 -   Custom activation functions
 -   Custom connections between layers
 -   Random weight initializing based on fan-in/out heuristics [1]
+-   Preprocessing tools: zero mean, unit variance, and more
 
 
 Getting started
