@@ -8,18 +8,20 @@ JuliaNet
 A deep neural network library for Julia. Features include:
 
 -   Multi-classification
+-   Convolutional and pooling layer support
+-   Autoencoders and pre-training
+-   Parallelization support
 -   Momentum
 -   Nesterov's Accelerated Gradient method [3]
+-   Dropout [2]
 -   Online, mini-batch, and batched learning
+-   Validation/monitoring sets
+-   Serializable models: quit training and reload a model at any time
 -   Custom stop criterion functions
 -   Custom hyper paramater update criterion
 -   Custom activation functions
 -   Custom connections between layers
 -   Random weight initializing based on fan-in/out heuristics [1]
--   Dropout [2]
--   Parallelization support
-
-The library is written such that it is easy to make modifications and customizations to the network structure and optimization strategies. In fact, it is encouraged you do make modifications to suit your needs instead of exclusively treating it as a black box.
 
 
 Getting started
@@ -33,16 +35,20 @@ Requirements
 
 -   Julia 0.3 or above
 
+There are no other dependencies execept for running the example code,
+where you will need
+[MNIST.jl](https://github.com/johnmyleswhite/MNIST.jl).
+
 
 Roadmap
 -------
 
 Near-future releases want to feature:
-
--   L1/L2 weight penalties
--   Max incoming weight constraints and scaling
--   Convolutional and pooling layers
+-   Better regularization techniques: L2 weight penalties and max incoming weight constraints and scaling
+-   Adaptive learning weights
 -   More test coverage
+-   Command line interface
+
 
 See the Issues tab for a full list of planned features.
 
