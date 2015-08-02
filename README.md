@@ -3,13 +3,13 @@ JuliaNet
 
 A deep neural network library for Julia. Features include:
 
--   Multi-classification
 -   Convolutional and pooling layer support
--   Autoencoders and pre-training
--   Parallelization support
+-   Stacked denoising autoencoders and pre-training
+-   Parallelization
+-   Dropout [2]
 -   Momentum
 -   Nesterov's Accelerated Gradient method [3]
--   Dropout [2]
+-   Multi-classification
 -   Online, mini-batch, and batched learning
 -   Validation/monitoring sets
 -   Serializable models: quit training and reload a model at any time
