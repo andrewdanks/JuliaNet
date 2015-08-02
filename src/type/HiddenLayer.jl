@@ -15,7 +15,7 @@ type HiddenLayer <: NeuralLayer
     corruption_level::T_FLOAT
 
     HiddenLayer(activator::Symbol, weights::Matrix{T_FLOAT}) = (
-        new(activator.activate, activator.∇activate, weights, 0.0, 0.0)
+        new(activator, weights, 0.0, 0.0)
     )
 
     function HiddenLayer(
