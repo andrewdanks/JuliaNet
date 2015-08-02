@@ -9,7 +9,8 @@ function fit!(
     config::FitConfig=FitConfig();
     loss_fn=cross_entropy_error,
     stop_criterion_fn=nothing,
-    params_update_fn=nothing
+    params_update_fn=nothing,
+    history_watcher_fn=nothing
 )
     if config.verbose
         show(params)
@@ -31,6 +32,10 @@ function fit!(
 
         if validation_batch != None
             fit_validation!(nn, params, validation_batch, history, loss_fn)
+        end
+
+        if isa(history_watcher_fn, Function)
+            history_watcher_fn(history)
         end
 
         if config.verbose
