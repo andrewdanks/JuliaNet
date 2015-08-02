@@ -1,11 +1,26 @@
-immutable type Activator
-    activate::Function
-    ∇activate::Function
+const symbol_to_activator = {
+    :identity => identity,
+    :sigmoid => sigmoid,
+    :tanh => tanh,
+    :lecun_tanh => lecun_tanh,
+    :softmax => softmax
+}
+
+
+const symbol_to_∇activator = {
+    :identity => identity,
+    :sigmoid => grad_sigmoid,
+    :tanh => grad_tanh,
+    :lecun_tanh => grad_lecun_tanh,
+    :softmax => (x) -> 1
+}
+
+
+function get_activator(symbol::Symbol)
+    symbol_to_activator[symbol]
 end
 
 
-IDENTITY_ACTIVATOR = Activator(identity, identity)
-SIGMOID_ACTIVATOR = Activator(sigmoid, grad_sigmoid)
-TANH_ACTIVATOR = Activator(tanh, grad_tanh)
-LECUN_TANH_ACTIVATOR = Activator(lecun_tanh, grad_lecun_tanh)
-SOFTMAX_ACTIVATOR = Activator(softmax, (x) -> 1)
+function get_∇activator(symbol::Symbol)
+    symbol_to_∇activator[symbol]
+end

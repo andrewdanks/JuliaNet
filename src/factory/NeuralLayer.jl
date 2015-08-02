@@ -1,7 +1,7 @@
 function FullyConnectedHiddenLayers(
     input_size::T_INT,
     sizes::Vector{T_INT},
-    activator::Activator,
+    activator::Symbol,
     weight_sampler::Function=default_weight_sampler
 )
     hidden_layers = NeuralLayer[]
@@ -21,8 +21,8 @@ function FullyConnectedHiddenAndOutputLayers(
     input_size::T_INT,
     sizes::Vector{T_INT},
     num_classes::T_INT,
-    activator::Activator=SIGMOID_ACTIVATOR,
-    output_layer_activator::Activator=SOFTMAX_ACTIVATOR,
+    activator::Symbol=:sigmoid,
+    output_layer_activator::Symbol=:softmax,
     weight_sampler::Function=default_weight_sampler
 )
     hidden_layers = FullyConnectedHiddenLayers(
@@ -38,7 +38,7 @@ end
 function FullyConnectedOutputLayer(
     input_size::T_UINT,
     num_classes::T_UINT,
-    activator::Activator=SOFTMAX_ACTIVATOR,
+    activator::Symbol=:softmax,
     weight_sampler::Function=default_weight_sampler
 )
     HiddenLayer(

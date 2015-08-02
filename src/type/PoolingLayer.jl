@@ -1,6 +1,5 @@
 type PoolingLayer <: FeatureMapLayer
-    activate::Function
-    ∇activate::Function
+    activator::Symbol
 
     feature_map_size::T_2D
     kernel_size::T_2D
@@ -23,8 +22,7 @@ type PoolingLayer <: FeatureMapLayer
         layer_size = prod(map_size) * num_maps
 
         new(
-            IDENTITY_ACTIVATOR.activate,
-            IDENTITY_ACTIVATOR.∇activate,
+            :identity,
             map_size,
             kernel_size,
             input_map_size,

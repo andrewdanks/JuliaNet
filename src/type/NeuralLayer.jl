@@ -64,7 +64,7 @@ function get_grad_error_wrt_net{T<:NeuralLayer}(
     layer::LinkedLayer{T},
     error_signal::T_2D_TENSOR
 )
-    ∇activate = layer.prev.data_layer.∇activate
+    ∇activate = get_∇activator(layer.prev.data_layer.activator)
     weights = layer.data_layer.weights
     prev_pre_activation = vectorized_data(InputTensor(layer.prev.pre_activation))
     (weights * error_signal) .* ∇activate(prev_pre_activation)

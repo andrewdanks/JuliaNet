@@ -1,5 +1,41 @@
 # Types applicable only to training
 
+immutable type HyperParams
+    epochs::T_INT
+    learning_rate::T_FLOAT
+    momentum::T_FLOAT
+
+    function HyperParams(;
+        epochs::T_UINT=1,
+        learning_rate::T_FLOAT=0.1,
+        momentum::T_FLOAT=0.,
+    )
+        new(epochs, learning_rate, momentum)
+    end
+end
+
+function Base.show(io::IO, params::HyperParams)
+    println(io, "Epochs: ", params.epochs)
+    println(io, "Learning Rate: ", params.learning_rate)
+    println(io, "Momentum: ", params.momentum)
+end
+
+
+immutable type FitConfig
+    save_file
+    verbose::Bool
+    parallelize::Bool
+
+    function FitConfig(;
+        save_file=nothing,
+        verbose::Bool=true,
+        parallelize::Bool=false
+    )
+        new(save_file, verbose, parallelize)
+    end
+end
+
+
 type FitHistory
     training_loss::Vector{T_FLOAT}
     training_classification_error::Vector{T_FLOAT}

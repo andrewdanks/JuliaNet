@@ -1,6 +1,5 @@
 type HiddenLayer <: NeuralLayer
-    activate::Function
-    ∇activate::Function
+    activator::Symbol
 
     # Dimensions: <pevious layer size x this layer size>
     # Each row corresponds to a neuron, so it represents the incoming
@@ -15,12 +14,12 @@ type HiddenLayer <: NeuralLayer
     dropout_coefficient::T_FLOAT
     corruption_level::T_FLOAT
 
-    HiddenLayer(activator::Activator, weights::Matrix{T_FLOAT}) = (
+    HiddenLayer(activator::Symbol, weights::Matrix{T_FLOAT}) = (
         new(activator.activate, activator.∇activate, weights, 0.0, 0.0)
     )
 
     function HiddenLayer(
-        activator::Activator,
+        activator::Symbol,
 
         # Dimensions: <pevious layer size x this layer size>
         # Matrix of 1s and 0s where 1s indicate where a connection is present
@@ -37,7 +36,7 @@ type HiddenLayer <: NeuralLayer
         # Zero-out the spots where we want no connections
         weights = weights .* connections
 
-        new(activator.activate, activator.∇activate, weights, 0.0, 0.0)
+        new(activator, weights, 0.0, 0.0)
     end
 
 end

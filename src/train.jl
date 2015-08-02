@@ -1,47 +1,70 @@
+using HDF5, JLD
+
+
 function fit!(
     nn::NeuralNetwork,
     params::HyperParams,
     training_batches::Vector{Batch},
-    validation_batch=None;
-
-    verbose::Bool=true,
-    parallelize::Bool=false,
-    params_update_fn=None
+    validation_batch=None,
+    config::FitConfig=FitConfig();
+    loss_fn=cross_entropy_error,
+    stop_criterion_fn=nothing,
+    params_update_fn=nothing
 )
-    if verbose
+    if config.verbose
         show(params)
     end
 
     batch_chunks = Vector[]
-    if parallelize
+    if config.parallelize
         batch_chunks = get_batch_chunks(training_batches)
     end
     
     history = FitHistory()
     for current_epoch = 1:params.epochs
-        if parallelize
-            training_loss = fit_epoch_parallel!(nn, params, batch_chunks)
+        if config.parallelize
+            training_loss = fit_epoch_parallel!(nn, params, batch_chunks, loss_fn)
         else
-            training_loss = fit_epoch!(nn, params, training_batches)
+            training_loss = fit_epoch!(nn, params, training_batches, loss_fn)
         end
         record_training_history!(history, training_loss)
 
         if validation_batch != None
-            fit_validation!(nn, params, validation_batch, history)
+            fit_validation!(nn, params, validation_batch, history, loss_fn)
         end
 
-        if verbose
+        if config.verbose
             show(history)
         end
 
-        if params.stop_criterion_fn(EarlyStopCriterion(current_epoch, history))
-            if verbose
+        if isa(config.save_file, String)
+            if config.verbose
+                print("Saving model to ", config.save_file, "...")
+            end
+            save(
+                config.save_file,
+                "model", nn,
+                "hyper_params", params,
+                "history", history,
+                "num_batches", length(training_batches),
+                "loss_fn", string(loss_fn),
+                "stop_criterion_fn", string(stop_criterion_fn),
+                "params_update_fn", string(params_update_fn),
+                "JULIANET_VERSION", JULIANET_VERSION
+            )
+            if config.verbose
+                println(" Done.")
+            end
+        end
+
+        if isa(stop_criterion_fn, Function) && stop_criterion_fn(EarlyStopCriterion(current_epoch, history))
+            if config.verbose
                 println("Early stopping after ", current_epoch, " epochs...")
             end
             break 
         end
 
-        if params_update_fn != None
+        if isa(params_update_fn, Function)
             params = params_update_fn(ParamUpdateCriterion(params, current_epoch, history))
         end
     end
@@ -52,10 +75,11 @@ function fit_validation!(
     nn::NeuralNetwork,
     params::HyperParams,
     validation_batch::Batch,
-    history::FitHistory
+    history::FitHistory,
+    loss_fn::Function
 )
     valid_output = forward_pass(nn, validation_batch.input)
-    validation_loss = params.loss_fn(valid_output, validation_batch.target_output)
+    validation_loss = loss_fn(valid_output, validation_batch.target_output)
     if isdefined(validation_batch, :target_classes)
         validation_classifcation_error = test_error(predict(nn, valid_output), validation_batch.target_classes)
         record_validation_history!(history, validation_loss, validation_classifcation_error)
@@ -68,7 +92,8 @@ end
 function fit_epoch!(
     nn::NeuralNetwork,
     params::HyperParams,
-    batches::Vector{Batch}
+    batches::Vector{Batch},
+    loss_fn::Function
 )
     linked_layers = LinkedLayer[]
     function do_fit_and_update(batch::Batch)
@@ -77,7 +102,7 @@ function fit_epoch!(
         linked_layers = get_linked_layers(nn.layers, linked_layers)
         output = fit_batch!(linked_layers, batch)
         update_weights!(linked_layers, params)
-        params.loss_fn(output, batch.target_output)
+        loss_fn(output, batch.target_output)
     end
 
     total_loss = reduce(+, [do_fit_and_update(batch) for batch in batches])
@@ -95,7 +120,8 @@ end
 function fit_epoch_parallel!(
     nn::NeuralNetwork,
     params::HyperParams,
-    batch_chunks::Vector
+    batch_chunks::Vector,
+    loss_fn::Function
 )
     linked_layers = LinkedLayer[]
     function do_fit_batch(batch::Batch)
@@ -103,7 +129,7 @@ function fit_epoch_parallel!(
         # in LinkedLayer that we want to maintain between batches
         linked_layers = get_linked_layers(nn.layers, linked_layers)
         output = fit_batch!(linked_layers, batch)
-        params.loss_fn(output, batch.target_output)
+        loss_fn(output, batch.target_output)
     end
 
     total_loss = 0
@@ -125,7 +151,7 @@ function fit_batch!(
 )
     output = forward_pass!(batch.input, linked_layers[1])
 
-    ∇activate = linked_layers[end].data_layer.∇activate
+    ∇activate = get_∇activator(linked_layers[end].data_layer.activator)
     pre_activation = linked_layers[end].pre_activation
     error_signal = grad_squared_error(output, batch.target_output) .* ∇activate(pre_activation)
     backward_pass!(error_signal, linked_layers[end])
@@ -145,7 +171,7 @@ function forward_pass!(
     layer.input = input  # TODO: this is a waste of memory
     layer.pre_activation = get_pre_activation(layer.data_layer, input)
     activation = InputTensor(
-        layer.data_layer.activate(layer.pre_activation)
+        get_activator(layer.data_layer.activator)(layer.pre_activation)
     )
     if layer.data_layer.dropout_coefficient > 0
         activation = zero_out_with_prob(activation, layer.data_layer.dropout_coefficient)
@@ -167,7 +193,7 @@ function forward_pass(nn::NeuralNetwork, input::InputTensor)
             pre_activation = pre_activation .* (1 - layer.dropout_coefficient)
         end
 
-        activation = layer.activate(pre_activation)
+        activation = get_activator(layer.activator)(pre_activation)
         input = InputTensor(activation)
     end
     vectorized_data(input)

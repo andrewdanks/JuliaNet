@@ -80,8 +80,8 @@ function verify_simple_network()
         NUM_FEATURES,
         [15, 25],
         NUM_CLASSES,
-        SIGMOID_ACTIVATOR,
-        SOFTMAX_ACTIVATOR,
+        :sigmoid,
+        :softmax,
         JuliaNet.default_weight_sampler
     )
     nn = NeuralNetwork(vcat(hidden_layers, output_layer))
@@ -91,7 +91,7 @@ end
 
 
 function verify_autoencoder()
-    ae = Autoencoder(NUM_FEATURES, 25, SIGMOID_ACTIVATOR)
+    ae = Autoencoder(NUM_FEATURES, 25, :sigmoid)
     batch = make_batch(X)
     verify_network(ae, batch, mean_squared_error)
 end

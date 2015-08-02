@@ -20,7 +20,7 @@ num_classes = length(classes)
 conv_layer = ConvolutionalLayer(
     input_maps, input_map_size,
     (5, 5), 4,
-    TANH_ACTIVATOR
+    :sigmoid
 )
 
 pooling_layer = PoolingLayer(
@@ -32,7 +32,7 @@ pooling_layer = PoolingLayer(
 cnn_layers = vcat(conv_layer, pooling_layer)
 
 hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
-    size(cnn_layers[end]), [1200, 1200], num_classes, SIGMOID_ACTIVATOR
+    size(cnn_layers[end]), [1200, 1200], num_classes, :sigmoid
 )
 hidden_layers[1].dropout_coefficient = 0.5
 hidden_layers[2].dropout_coefficient = 0.5
@@ -42,7 +42,6 @@ batches = make_batches(trainX, 100, classes, trainY, input_map_size)
 validation_batch = make_batch(validX, classes, validY, input_map_size)
 
 params = HyperParams()
-params.batch_size = 100
 params.epochs = 10
 params.momentum = 0.4
 params.learning_rate = 0.7

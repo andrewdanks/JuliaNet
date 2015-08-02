@@ -17,7 +17,7 @@ num_features = 28 * 28
 num_classes = length(classes)
 
 hidden_layers, output_layer = FullyConnectedHiddenAndOutputLayers(
-    num_features, [1200, 1200], num_classes, SIGMOID_ACTIVATOR
+    num_features, [1200, 1200], num_classes, :sigmoid
 )
 hidden_layers[1].dropout_coefficient = 0.5
 hidden_layers[2].dropout_coefficient = 0.5
@@ -26,18 +26,13 @@ nn = NeuralNetwork(vcat(hidden_layers, output_layer), classes)
 batches = make_batches(trainX, 100, classes, trainY)
 validation_batch = make_batch(textX, classes, testY)
 
-params = HyperParams()
-params.batch_size = 100
-params.epochs = 10
-params.momentum = 0.7
-params.learning_rate = 0.4
-
+params = HyperParams(epochs=10, learning_rate=0.4, momentum=0.7)
 fit!(
     nn,
     params,
     batches,
     validation_batch,
-    parallelize=false
+    FitConfig(save_file="simple.jld")
 )
 
 predictions = predict(nn, textX, testY)

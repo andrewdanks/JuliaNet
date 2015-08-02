@@ -16,11 +16,7 @@ A deep neural network library for Julia. Features include:
 -   Parallelization support
 -   Convolutional and pooling layer support
 -   Autoencoders and pre-training
-
-The library is written such that it is easy to make modifications and
-customizations to the network structure and optimization strategies. In
-fact, it is encouraged you do make modifications to suit your needs
-instead of exclusively treating it as a black box.
+-   Serializable models: quit training and reload a model at any time
 
 
 Getting started

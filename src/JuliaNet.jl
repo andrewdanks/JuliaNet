@@ -11,8 +11,8 @@ include("type/HyperParams.jl")
 include("type/Activator.jl")
 include("type/InputTensor.jl")
 include("preprocess.jl")
-include("type/NeuralLayer.jl")
 include("type/training.jl")
+include("type/NeuralLayer.jl")
 include("type/HiddenLayer.jl")
 include("type/FeatureMapLayer.jl")
 include("type/ConvolutionalLayer.jl")
@@ -49,6 +49,7 @@ export NeuralNetwork,
        ConvolutionalLayer,
        PoolingLayer,
        HyperParams,
+       FitConfig,
        InputTensor
 
 export FullyConnectedHiddenLayers,
@@ -62,12 +63,6 @@ export zero_mean,
        unit_variance,
        make_batch,
        make_batches
-
-export IDENTITY_ACTIVATOR,
-       SIGMOID_ACTIVATOR,
-       TANH_ACTIVATOR,
-       SOFTMAX_ACTIVATOR,
-       Activator
 
 export sigmoid, grad_sigmoid, grad_tanh, grad_squared_error
 

@@ -1,6 +1,5 @@
 type ConvolutionalLayer <: FeatureMapLayer
-    activate::Function
-    ∇activate::Function
+    activator::Symbol
 
     weights::T_4D_TENSOR
 
@@ -14,7 +13,7 @@ type ConvolutionalLayer <: FeatureMapLayer
         input_map_size::T_2D,
         kernel_size::T_2D,
         num_maps::T_INT,
-        activator::Activator,
+        activator::Symbol,
         weight_sampler::Function=default_weight_sampler
     )
         map_size = get_feature_map_size(input_map_size, kernel_size)
@@ -25,8 +24,7 @@ type ConvolutionalLayer <: FeatureMapLayer
         )
 
         new(
-            activator.activate,
-            activator.∇activate,
+            activator,
             weights,
             map_size,
             kernel_size,

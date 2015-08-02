@@ -11,7 +11,7 @@ end
 function Autoencoder(
     input_size::T_UINT,
     hidden_layer_size::T_UINT,
-    activator::Activator,
+    activator::Symbol,
     corruption_level::T_FLOAT=0.0,
     weight_sampler::Function=default_weight_sampler
 )
@@ -22,7 +22,7 @@ end
 function StackedAutoencoder(
     input_size::T_UINT,
     hidden_layer_sizes::Vector{T_UINT},
-    activator::Activator,
+    activator::Symbol,
     corruption_levels::Vector{T_FLOAT}=zeros(length(hidden_layer_sizes)),
     weight_sampler::Function=default_weight_sampler
 )

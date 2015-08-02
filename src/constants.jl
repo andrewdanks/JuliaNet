@@ -1,3 +1,5 @@
+const JULIANET_VERSION = 0.1
+
 const T_FLOAT = Float64
 const T_INT = Int64
 const T_UINT = Int64
