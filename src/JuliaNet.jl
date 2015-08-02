@@ -7,7 +7,6 @@ include("constants.jl")
 
 include("util/activation.jl")
 
-include("type/HyperParams.jl")
 include("type/Activator.jl")
 include("type/InputTensor.jl")
 include("preprocess.jl")
