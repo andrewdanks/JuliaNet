@@ -36,13 +36,24 @@ end
 
 
 function update_weights!{T<:NeuralLayer}(layer::LinkedLayer{T}, params::HyperParams)
-    prev_weight_delta = 0
-    if params.momentum > 0 && isdefined(layer, :prev_weight_delta)
-        prev_weight_delta = layer.prev_weight_delta 
+    if isdefined(layer, :weight_delta)
+        prevΔ = layer.weight_delta
+    else
+        prevΔ = 0.0
     end
-    weight_delta = params.momentum * prev_weight_delta - params.learning_rate * layer.grad_weights
-    layer.weight_delta = weight_delta
-    layer.data_layer.weights += weight_delta
+    η = params.learning_rate
+    μ = params.momentum
+    dx = layer.grad_weights
+    if params.nesterov
+        velocity = μ * prevΔ - η * dx
+        Δ = -μ * prevΔ + (1 + μ) * velocity
+    elseif μ > 0
+        Δ = μ * prevΔ - η * dx
+    else
+        Δ = -η * dx
+    end
+    layer.weight_delta = Δ
+    layer.data_layer.weights += Δ
 end
 
 

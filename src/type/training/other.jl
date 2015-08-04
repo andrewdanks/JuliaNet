@@ -4,13 +4,15 @@ immutable type HyperParams
     epochs::T_INT
     learning_rate::T_FLOAT
     momentum::T_FLOAT
+    nesterov::Bool
 
     function HyperParams(;
         epochs::T_UINT=1,
         learning_rate::T_FLOAT=0.1,
         momentum::T_FLOAT=0.,
+        nesterov::Bool=false
     )
-        new(epochs, learning_rate, momentum)
+        new(epochs, learning_rate, momentum, nesterov)
     end
 end
 
@@ -18,6 +20,7 @@ function Base.show(io::IO, params::HyperParams)
     println(io, "Epochs: ", params.epochs)
     println(io, "Learning Rate: ", params.learning_rate)
     println(io, "Momentum: ", params.momentum)
+    println(io, "Nesterov: ", params.nesterov)
 end
 
 

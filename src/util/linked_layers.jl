@@ -22,7 +22,7 @@ function get_linked_layers(
     for (i, prev_ll) in enumerate(prev_linked_layers)
         layer = linked_layers[i]
         if isdefined(prev_ll, :weight_delta)
-            layer.prev_weight_delta = prev_ll.weight_delta
+            layer.weight_delta = prev_ll.weight_delta
         end
     end
 
