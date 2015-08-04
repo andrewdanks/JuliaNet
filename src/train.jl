@@ -7,7 +7,7 @@ function fit!(
     training_batches::Vector{Batch},
     validation_batch=None,
     config::FitConfig=FitConfig();
-    loss_fn=cross_entropy_error,
+    loss_fn=mean_squared_error,
     stop_criterion_fn=nothing,
     params_update_fn=nothing,
     history_watcher_fn=nothing
@@ -39,7 +39,7 @@ function fit!(
         end
 
         if config.verbose
-            show(history)
+            show_epoch(STDOUT, history, current_epoch)
         end
 
         if isa(config.save_file, String)

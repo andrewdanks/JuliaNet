@@ -4,7 +4,7 @@ using MNIST
 srand(34455)
 
 X, Y = MNIST.traindata()
-trainX, trainY = X[:, 1:10000], Y[1:10000]
+trainX, trainY = X[:, 1:50000], Y[1:50000]
 validX, validY = X[:, 50001:end], Y[50001:end]
 testX, testY = MNIST.testdata()
 
@@ -23,10 +23,10 @@ hidden_layers[1].dropout_coefficient = 0.5
 hidden_layers[2].dropout_coefficient = 0.5
 
 nn = NeuralNetwork(vcat(hidden_layers, output_layer), classes)
-batches = make_batches(trainX, 100, classes, trainY)
+batches = make_batches(trainX, 20, classes, trainY)
 validation_batch = make_batch(textX, classes, testY)
 
-params = HyperParams(epochs=10, learning_rate=0.4, momentum=0.7)
+params = HyperParams(epochs=1000, learning_rate=0.3, momentum=0.7)
 fit!(
     nn,
     params,
