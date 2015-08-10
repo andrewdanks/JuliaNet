@@ -41,9 +41,13 @@ function update_weights!{T<:NeuralLayer}(layer::LinkedLayer{T}, params::HyperPar
     else
         prevΔ = 0.0
     end
+
     η = params.learning_rate
     μ = params.momentum
+    λ = params.L2_decay
     dx = layer.grad_weights
+    n = layer.activation.batch_size
+
     if params.nesterov
         velocity = μ * prevΔ - η * dx
         Δ = -μ * prevΔ + (1 + μ) * velocity
@@ -52,6 +56,11 @@ function update_weights!{T<:NeuralLayer}(layer::LinkedLayer{T}, params::HyperPar
     else
         Δ = -η * dx
     end
+
+    if λ > 0
+        layer.data_layer.weights *= 1 - η*λ / n
+    end
+
     layer.weight_delta = Δ
     layer.data_layer.weights += Δ
 end

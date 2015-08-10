@@ -7,6 +7,7 @@ A deep neural network library for Julia. Features include:
 -   Stacked denoising autoencoders and pre-training
 -   Parallelization
 -   Dropout [2]
+-   L2 weight decay
 -   Momentum
 -   Nesterov's Accelerated Gradient method [3]
 -   Multi-classification
@@ -41,7 +42,7 @@ Roadmap
 -------
 
 Near-future releases want to feature:
--   Better regularization techniques: L2 weight penalties and max incoming weight constraints and scaling
+-   Better regularization techniques: max incoming weight constraints and scaling
 -   Adaptive learning weights
 -   More test coverage
 -   Command line interface
