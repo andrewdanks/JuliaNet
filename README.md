@@ -31,11 +31,11 @@ See the examples directory for use cases.
 Requirements
 ------------
 
--   Julia 0.3 or above
-
-There are no other dependencies execept for running the example code,
-where you will need
-[MNIST.jl](https://github.com/johnmyleswhite/MNIST.jl).
+-   Julia 0.4 or above
+-   MNIST.jl
+-   PyCall
+-   HDF5
+-   JLD
 
 
 Roadmap
