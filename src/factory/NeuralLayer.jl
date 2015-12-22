@@ -8,7 +8,7 @@ function FullyConnectedHiddenLayers(
     prev_layer_size = input_size
     for layer_size in sizes
         connections = ones(prev_layer_size, layer_size)
-        hidden_layer = HiddenLayer(activator, int(connections), weight_sampler)
+        hidden_layer = HiddenLayer(activator, to_int(connections), weight_sampler)
         push!(hidden_layers, hidden_layer)
         prev_layer_size = layer_size
         input_layer = hidden_layer
@@ -43,7 +43,7 @@ function FullyConnectedOutputLayer(
 )
     HiddenLayer(
         activator,
-        int(ones(input_size, num_classes)),
+        to_int(ones(input_size, num_classes)),
         weight_sampler
     )
 end

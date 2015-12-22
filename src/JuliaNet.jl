@@ -1,5 +1,7 @@
 module JuliaNet
 
+import Base.+
+import Base.==
 import Base.push!
 import Base.size
 

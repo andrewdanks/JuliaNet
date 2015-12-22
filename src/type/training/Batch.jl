@@ -1,4 +1,4 @@
-immutable type Batch
+immutable Batch
     input::InputTensor
     target_output::T_TENSOR
     target_classes::Vector

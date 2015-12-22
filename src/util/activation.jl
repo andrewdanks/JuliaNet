@@ -47,22 +47,22 @@ function grad_squared_error(
 end
 
 
-const symbol_to_activator = {
+const symbol_to_activator = Dict{Symbol, Function}(
     :identity => identity,
     :sigmoid => sigmoid,
     :tanh => tanh,
     :lecun_tanh => lecun_tanh,
     :softmax => softmax
-}
+)
 
 
-const symbol_to_∇activator = {
+const symbol_to_∇activator = Dict{Symbol, Function}(
     :identity => identity,
     :sigmoid => grad_sigmoid,
     :tanh => grad_tanh,
     :lecun_tanh => grad_lecun_tanh,
     :softmax => (x) -> 1
-}
+)
 
 
 function get_activator(symbol::Symbol)

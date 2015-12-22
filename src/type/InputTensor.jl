@@ -31,11 +31,11 @@ type InputTensor
         InputTensor(input, reshape_dims)
     end
 
-    function InputTensor(input::T_2D_TENSOR, reshape_dims::UnionType)
+    function InputTensor(input::T_2D_TENSOR, reshape_dims::T_2D)
         InputTensor(input)
     end
 
-    function InputTensor(input::T_2D_TENSOR, reshape_dims::(T_UINT, T_UINT))
+    function InputTensor(input::T_2D_TENSOR, reshape_dims::T_2D)
         size_input = size(input)
         batch_size = size_input[2]
         new_input = zeros(batch_size, 1, size_input[1])
@@ -50,7 +50,7 @@ type InputTensor
         InputTensor(input, (size_input[3], 1))
     end
 
-    function InputTensor(input::T_3D_TENSOR, reshape_dims::(T_INT, T_INT))
+    function InputTensor(input::T_3D_TENSOR, reshape_dims::T_2D)
         size_input = size(input)
         batch_size = size_input[1]
         num_maps = size_input[2]

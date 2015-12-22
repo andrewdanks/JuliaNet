@@ -1,4 +1,4 @@
-immutable type NeuralNetwork
+type NeuralNetwork
     layers::Vector{NeuralLayer}
     classes::Vector
 

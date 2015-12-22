@@ -14,7 +14,7 @@ function unit_variance(M::Matrix{T_FLOAT})
 end
 
 
-function default_weight_sampler(dims::(T_UINT, T_UINT))
+function default_weight_sampler(dims::Tuple{T_UINT, T_UINT})
     default_weight_sampler(dims[1], dims[2])
 end
 
@@ -61,9 +61,9 @@ function make_batch(
     data::T_TENSOR,
     classes::Vector,
     target_classes::Vector,
-    input_map_size=None
+    input_map_size=T_NONE
 )
-    if input_map_size != None
+    if input_map_size != T_NONE
         data_tensor = InputTensor(data, input_map_size)
     else
         data_tensor = InputTensor(data)
@@ -91,10 +91,10 @@ function make_batches(
     batch_size::T_INT,
     classes::Vector,
     target_classes::Vector,
-    input_map_size=None
+    input_map_size=T_NONE
 )
     batches = Batch[]
-    if input_map_size != None
+    if input_map_size != T_NONE
         data_tensor = InputTensor(data, input_map_size)
     else
         data_tensor = InputTensor(data)
@@ -111,9 +111,9 @@ end
 
 function make_batch(
     data::T_TENSOR,
-    input_map_size=None
+    input_map_size=T_NONE
 )
-    if input_map_size != None
+    if input_map_size != T_NONE
         input = InputTensor(data, input_map_size)
     else
         input = InputTensor(data)
@@ -125,7 +125,7 @@ end
 function make_batches(
     data::T_TENSOR,
     batch_size::T_INT,
-    input_map_size=None
+    input_map_size=T_NONE
 )
     batches = Batch[]
     data_tensor = InputTensor(data)

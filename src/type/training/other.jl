@@ -1,6 +1,6 @@
 # Types applicable only to training
 
-immutable type HyperParams
+immutable HyperParams
     epochs::T_INT
     learning_rate::T_FLOAT
     momentum::T_FLOAT
@@ -27,7 +27,7 @@ function Base.show(io::IO, params::HyperParams)
 end
 
 
-immutable type FitConfig
+immutable FitConfig
     save_file
     verbose::Bool
     parallelize::Bool
@@ -42,7 +42,7 @@ immutable type FitConfig
 end
 
 
-immutable type BatchResults
+immutable BatchResults
     grad_weights
     loss
     classification_error
@@ -50,7 +50,7 @@ immutable type BatchResults
 end
 
 
-immutable type EpochResults
+immutable EpochResults
     loss
     classification_error
     EpochResults(loss) = new(loss)
@@ -73,20 +73,20 @@ function +(a::BatchResults, b::BatchResults)
 end
 
 
-immutable type EarlyStopCriterion
+immutable EarlyStopCriterion
     current_epoch::T_UINT
     history::FitHistory
 end
 
 
-immutable type ParamUpdateCriterion
+immutable ParamUpdateCriterion
     params::HyperParams
     current_epoch::T_UINT
     history::FitHistory
 end
 
 
-immutable type FitResults
+immutable FitResults
     training_loss_history::Array{T_FLOAT, 1}
     validation_loss_history::Array{T_FLOAT, 1}
     time::T_FLOAT

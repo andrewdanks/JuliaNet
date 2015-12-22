@@ -5,7 +5,7 @@ function fit!(
     nn::NeuralNetwork,
     params::HyperParams,
     training_batches::Vector{Batch},
-    validation_batch=None,
+    validation_batch=T_NONE,
     config::FitConfig=FitConfig();
     loss_fn=mean_squared_error,
     stop_criterion_fn=nothing,
@@ -30,7 +30,7 @@ function fit!(
         end
         record_training_history!(history, training_loss)
 
-        if validation_batch != None
+        if validation_batch != T_NONE
             fit_validation!(nn, params, validation_batch, history, loss_fn)
         end
 
@@ -42,7 +42,7 @@ function fit!(
             show_epoch(STDOUT, history, current_epoch)
         end
 
-        if isa(config.save_file, String)
+        if isa(config.save_file, AbstractString)
             if config.verbose
                 print("Saving model to ", config.save_file, "...")
             end
@@ -52,9 +52,9 @@ function fit!(
                 "hyper_params", params,
                 "history", history,
                 "num_batches", length(training_batches),
-                "loss_fn", string(loss_fn),
-                "stop_criterion_fn", string(stop_criterion_fn),
-                "params_update_fn", string(params_update_fn),
+                "loss_fn", AbstractString(loss_fn),
+                "stop_criterion_fn", AbstractString(stop_criterion_fn),
+                "params_update_fn", AbstractString(params_update_fn),
                 "JULIANET_VERSION", JULIANET_VERSION
             )
             if config.verbose
